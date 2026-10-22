@@ -26,6 +26,7 @@ UI 插件的槽位/区域标识以 shared `ui-plugins.ts` 为单源。新增对�
 | backend registry | 当前在册的 SDK 实例与资源所有权，不代表所有历史会话 |
 | renderer `sessions` | 已加载会话的运行态；GC 可以移出，不决定导航行是否存在 |
 | renderer `projects.allSessions` | 会话目录：磁盘对账 + 本进程新会话写穿；作为导航存在性来源 |
+| 归档会话树 | `archived-sessions/` 磁盘文件：移出 sessions 树即导航/LAN/CLI 不可见；manifest 仅缓存归档时间供保留期清理，文件自身是权威，缺失时回退 mtime |
 | renderer `session-workspace` | 顶栏胶囊和轨道的有序成员；独立于内存加载状态与置顶偏好 |
 | renderer `pinnedSessions` | 左栏长期收藏与组内置顶，不决定顶栏成员或工作区顺序 |
 | renderer `transcript` | 历史回放 + 实时事件的 UI 投影，不直接修改 SDK 上下文 |
@@ -54,6 +55,8 @@ UI 插件的槽位/区域标识以 shared `ui-plugins.ts` 为单源。新增对�
 ## 用户数据与安全
 
 正式 agent 数据在 `~/.pi/agent/`，与 CLI 共享；开发/预览通过 `main/dev-agent-dir.ts` 隔离到 `~/.pi/agent-dev/`，Electron userData 使用 `-dev` 后缀。具体开发路径与实例管理见 [UI 调试](ui-debugging.md)。
+
+归档会话移入 `~/.pi/agent/archived-sessions/`（镜像 sessions 布局，backend `session/archive.ts` 单一实现）；归档即从导航与工作区摘除并清理 traces，恢复移回原位。保留期读 settings.json 键 `archiveRetentionDays`（null=永不，损坏/缺失回退默认 7 天），启动对账 manifest 后每 24 小时清理过期归档。
 
 权限模式属于会话，不是改写全局权限规则；第三方扩展的通用 confirm 不是工具授权。模式三档：chatOnly（只读白名单，读工具照走求值链，写/命令/子代理/MCP 直接拦截，并由 backend 在每轮注入只读纪律段到 system prompt）、default（按规则审批）、fullAccess（一切放行 + 高危调用写审计）。MCP/第三方工具无只读声明时不能默认放行，求值链以 backend `permissions/` 为准。
 

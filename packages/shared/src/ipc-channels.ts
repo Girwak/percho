@@ -11,6 +11,8 @@ import type { McpConfigListResult, McpMutationResult, McpServersChangedPayload, 
 import type { CatalogPackageType, CatalogSearchResult, ConfiguredPackageInfo } from "./packages";
 import type {
 	AppInfo,
+	ArchiveConfigInfo,
+	ArchivedSessionMeta,
 	AvailableModel,
 	ChannelWatchConfigInfo,
 	ContextManagerConfigInfo,
@@ -104,6 +106,16 @@ export const SESSION_CHANNELS = {
 	>(),
 	/** 删除会话（含磁盘 jsonl 文件，不可恢复） */
 	deleteSession: ch("session:delete")<{ sessionId: string; sessionFile?: string }, void>(),
+	/** 归档会话（活跃会话先关闭再移入归档根；traces 一并删除，可恢复） */
+	archiveSession: ch("session:archive")<{ sessionId: string; sessionFile?: string }, void>(),
+	/** 归档清单（设置 → 会话归档面板数据源；按项目分组由 renderer 派生） */
+	listArchivedSessions: ch("session:listArchived")<void, ArchivedSessionMeta[]>(),
+	/** 从归档恢复到历史会话列表（左栏可见） */
+	unarchiveSession: ch("session:unarchive")<{ sessionFile: string }, void>(),
+	/** 删除归档会话（含磁盘文件，不可恢复） */
+	deleteArchivedSession: ch("session:deleteArchived")<{ sessionFile: string }, void>(),
+	/** 立即清理超过保留期的归档（设置窗口按钮；返回清理数） */
+	purgeExpiredArchived: ch("session:purgeExpiredArchived")<void, number>(),
 	/** 发送消息；images 为随消息附带的图片（base64） */
 	prompt: ch("session:prompt")<{ sessionId: string; text: string; images?: ImageInput[] }, void>(),
 	/** 仅重试当前末端模型失败，不新增用户消息；受理即返回，执行结果走事件流。 */
@@ -281,6 +293,9 @@ export const SETTINGS_CHANNELS = {
 	/** channel-watch 跨会话频道唤醒开关 */
 	getChannelWatchConfig: ch("channelWatch:getConfig")<void, ChannelWatchConfigInfo>(),
 	setChannelWatchEnabled: ch("channelWatch:setEnabled")<{ enabled: boolean }, void>(),
+	/** 会话归档保留期（档位 7/30/90/null；null = 永不自动清理，缺省 7） */
+	getArchiveConfig: ch("archive:getConfig")<void, ArchiveConfigInfo>(),
+	setArchiveRetention: ch("archive:setRetention")<{ days: number | null }, ArchiveConfigInfo>(),
 	/** 项目信任请求应答（选项下标） */
 	respondTrust: ch("trust:respond")<{ requestId: string; answer: TrustAnswer }, void>(),
 } as const;

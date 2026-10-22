@@ -6,7 +6,7 @@ import { useProjectsStore } from "../../stores/projects";
 import { useSessionsStore } from "../../stores/sessions";
 import { useToastsStore } from "../../stores/toasts";
 import { useUiPreferencesStore } from "../../stores/ui-preferences";
-import { CopyIcon, PencilIcon, PinIcon, TrashIcon } from "../icons";
+import { ArchiveIcon, CopyIcon, PencilIcon, PinIcon, TrashIcon } from "../icons";
 import type { ContextMenuItem } from "../ui/ContextMenu";
 
 /**
@@ -85,8 +85,19 @@ export async function copySessionDiagnostics(session: SessionMeta): Promise<void
 	}
 }
 
-/** 菜单项：重命名 / 置顶 / 复制诊断 / 删除会话（调用方保证会话可写，见 canOpenSessionMenu）。
- *  后两项只在调用方传了处理器时出现（顶栏胶囊菜单只给前两项），删除走分隔线分组 + 危险红。 */
+/** 归档落盘：文件移入 archived-sessions，侧栏立即消失；失败弹 toast（与 renameSession 同型） */
+export function archiveSession(session: SessionMeta): void {
+	useProjectsStore
+		.getState()
+		.archiveSession(session)
+		.catch((error) => {
+			console.error("归档失败", error);
+			useToastsStore.getState().push("error", "toast.sessionArchiveFailed");
+		});
+}
+
+/** 菜单项：重命名 / 置顶 / 复制诊断 / 归档 / 删除会话（调用方保证会话可写，见 canOpenSessionMenu）。
+ *  后三项只在调用方传了处理器时出现（顶栏胶囊菜单给重命名/置顶/归档），删除走分隔线分组 + 危险红。 */
 export function sessionMenuItems(
 	t: Translate,
 	options: {
@@ -94,6 +105,7 @@ export function sessionMenuItems(
 		pinned: boolean;
 		onRename: () => void;
 		onCopyDiagnostics?: () => void;
+		onArchive?: () => void;
 		onDelete?: () => void;
 	},
 ): ContextMenuItem[] {
@@ -112,6 +124,17 @@ export function sessionMenuItems(
 						label: t("sessionMenu.copyDiagnostics"),
 						icon: <CopyIcon size={13} />,
 						onSelect: options.onCopyDiagnostics,
+					} satisfies ContextMenuItem,
+				]
+			: []),
+		...(options.onArchive
+			? [
+					{
+						key: "archive",
+						label: t("sessionMenu.archive"),
+						icon: <ArchiveIcon size={13} />,
+						separatorBefore: true,
+						onSelect: options.onArchive,
 					} satisfies ContextMenuItem,
 				]
 			: []),

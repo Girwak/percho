@@ -44,6 +44,8 @@ export function registerSettingsIpc(backend: PiBackend): void {
 		setContextManagerMode: ({ mode }) => backend.setContextManagerMode(mode),
 		getChannelWatchConfig: () => backend.getChannelWatchConfig(),
 		setChannelWatchEnabled: ({ enabled }) => backend.setChannelWatchEnabled(enabled),
+		getArchiveConfig: () => backend.getArchiveConfig(),
+		setArchiveRetention: ({ days }) => backend.setArchiveRetention(days),
 		respondTrust: ({ requestId, answer }) => backend.respondTrust(requestId, answer),
 	});
 }

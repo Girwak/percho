@@ -39,7 +39,7 @@ import { ContextMenu, type ContextMenuItem } from "../ui/ContextMenu";
 import type { MenuAnchor } from "../ui/place-menu";
 import { RenamePopover } from "./RenamePopover";
 import { SessionAvatar } from "./SessionAvatar";
-import { canOpenSessionMenu, renameSession, sessionMenuItems } from "./session-menu";
+import { archiveSession, canOpenSessionMenu, renameSession, sessionMenuItems } from "./session-menu";
 import { sessionTitle, useSessionStatus } from "./session-status";
 import { UpdateButton } from "./UpdateButton";
 
@@ -295,13 +295,17 @@ export function SessionTabBar() {
 		setRenaming(null); // 换一个胶囊右键：覆盖旧菜单（同一时刻只存在一层）
 		setMenu({ sessionId, anchor });
 	};
-	/** 右键菜单项（重命名 + 置顶/取消置顶）：规则与动作在 components/session/session-menu.tsx，与悬浮面板共用一份 */
-	const contextMenuItems = (sessionId: string): ContextMenuItem[] =>
-		sessionMenuItems(t, {
+	/** 右键菜单项（重命名 + 置顶/取消置顶 + 归档）：规则与动作在 components/session/session-menu.tsx，与悬浮面板共用一份。
+	 *  归档只在会话已落盘时出现（未落盘的新会话没有文件可移，后端会拒） */
+	const contextMenuItems = (sessionId: string): ContextMenuItem[] => {
+		const session = barSessions.find((s) => s.sessionId === sessionId);
+		return sessionMenuItems(t, {
 			sessionId,
 			pinned: pinnedSessions.includes(sessionId),
 			onRename: () => setRenaming(menu),
+			onArchive: session?.sessionFile ? () => void archiveSession(session) : undefined,
 		});
+	};
 	/** 被拖胶囊拾起时的实测宽度（px）：ghost 全程沿用，保持原胶囊尺寸。
 	    不能读 active.rect.current.initial——dnd-kit 在 onDragStart 之后才填充该 ref，事件回调里恒为 null */
 	const [dragWidth, setDragWidth] = useState<number | null>(null);

@@ -161,6 +161,33 @@ export interface SessionStats {
 	cost: number;
 }
 
+/**
+ * 归档会话元数据（设置 → 会话归档面板数据源）。列表由 backend 扫 archived-sessions 树合成，
+ * 不进入 listSessions/listAllSessions（文件已移出 sessions/ 树，SDK 与 pi CLI 天然不可见）。
+ */
+export interface ArchivedSessionMeta {
+	sessionId: string;
+	/** 归档文件路径（archived-sessions 树内；unarchive/deleteArchived 以此定位） */
+	sessionFile: string;
+	/** 原项目目录（会话 header cwd；面板按它分组） */
+	cwd: string;
+	name?: string;
+	messageCount: number;
+	createdAt: number;
+	/** 会话自身最后活动时间（会话时间戳，非归档时间） */
+	modifiedAt?: number;
+	/** 归档时间（unix 毫秒；manifest 主存，缺条目回退文件 mtime） */
+	archivedAt: number;
+	/** 预计自动清理时间（archivedAt + retentionDays；保留期为「永不」时 null） */
+	expiresAt: number | null;
+}
+
+/** 会话归档配置（保留期档位；键在 ~/.pi/agent/settings.json） */
+export interface ArchiveConfigInfo {
+	/** 归档保留天数；null = 永不自动清理（UI 档位 7/30/90/永不，缺省 7） */
+	retentionDays: number | null;
+}
+
 /** 历史会话中的一次工具调用（渲染用） */
 export interface SessionToolCall {
 	id: string;

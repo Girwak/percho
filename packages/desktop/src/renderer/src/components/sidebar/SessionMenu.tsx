@@ -5,6 +5,7 @@ import { useProjectsStore } from "../../stores/projects";
 import { useUiPreferencesStore } from "../../stores/ui-preferences";
 import { RenamePopover } from "../session/RenamePopover";
 import {
+	archiveSession,
 	copySessionDiagnostics,
 	renameSession,
 	sessionMenuItems,
@@ -44,6 +45,7 @@ export function useSessionMenu() {
 						pinned: pinnedSessions.includes(menu.session.sessionId),
 						onRename: () => setRenaming({ session: menu.session, anchor: menu.anchor }),
 						onCopyDiagnostics: () => void copySessionDiagnostics(menu.session),
+						onArchive: () => void archiveSession(menu.session),
 						onDelete: () => setDeleting(menu.session),
 					})}
 				/>
