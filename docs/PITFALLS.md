@@ -5,6 +5,7 @@
 | 症状或任务 | 去哪里查 |
 |---|---|
 | 编译通过但 SDK 行为变了、MCP 子进程关不掉 | [SDK 集成](sdk.md)：版本、shutdown、工具与上下文 |
+| dev 首启 npm ENOENT 风暴、创建会话报 install failed | [SDK 集成](sdk.md) 升级清单第 3 条：引擎 npm 安装互斥补丁 |
 | 模型列表空、刷新触网、Vertex 登录失败 | [SDK 集成](sdk.md) 的模型与工具；backend `settings/` |
 | 压缩后历史丢失、todo 消失、压缩死锁 | [SDK 集成](sdk.md) 的回放与压缩；[架构](architecture.md) 的数据归属 |
 | 切会话抢焦点、目录行消失、工作区与置顶混淆 | [架构](architecture.md) 的会话数据与导航 |

@@ -90,3 +90,72 @@ index ec5f44e..7786dc4 100644
      /**
       * Send a prompt to the agent.
       * - Handles extension commands (registered via pi.registerCommand) immediately, even during streaming
+diff --git a/node_modules/@earendil-works/pi-coding-agent/dist/core/package-manager.js b/node_modules/@earendil-works/pi-coding-agent/dist/core/package-manager.js
+index e733dc0..e5c5dd6 100644
+--- a/node_modules/@earendil-works/pi-coding-agent/dist/core/package-manager.js
++++ b/node_modules/@earendil-works/pi-coding-agent/dist/core/package-manager.js
+@@ -35,6 +35,21 @@ import { BUILTIN_PATH_PREFIX } from "./source-info.js";
+ const NETWORK_TIMEOUT_MS = 10000;
+ const UPDATE_CHECK_CONCURRENCY = 4;
+ const GIT_UPDATE_CONCURRENCY = 4;
++// Percho patch: serialize npm command runs per install root. Concurrent `npm install --prefix`
++// runs into the same tree race during extraction and corrupt node_modules (ENOENT storms, ENOTDIR).
++const npmCommandChains = new Map();
++function runNpmCommandExclusive(installRoot, run) {
++    const previous = npmCommandChains.get(installRoot) ?? Promise.resolve();
++    const result = previous.then(run, run);
++    const settled = result.then(() => { }, () => { });
++    npmCommandChains.set(installRoot, settled);
++    void settled.then(() => {
++        if (npmCommandChains.get(installRoot) === settled) {
++            npmCommandChains.delete(installRoot);
++        }
++    });
++    return result;
++}
+ function isOfflineModeEnabled() {
+     const value = process.env.PI_OFFLINE;
+     if (!value)
+@@ -938,8 +953,10 @@ export class DefaultPackageManager {
+     }
+     async installNpmBatch(specs, scope) {
+         const installRoot = this.getNpmInstallRoot(scope, false);
+-        this.ensureNpmProject(installRoot);
+-        await this.runNpmCommand(this.getNpmInstallArgs(specs, installRoot));
++        await runNpmCommandExclusive(installRoot, () => {
++            this.ensureNpmProject(installRoot);
++            return this.runNpmCommand(this.getNpmInstallArgs(specs, installRoot));
++        });
+     }
+     async checkForAvailableUpdates() {
+         if (isOfflineModeEnabled()) {
+@@ -1526,8 +1543,10 @@ export class DefaultPackageManager {
+     }
+     async installNpm(source, scope, temporary) {
+         const installRoot = this.getNpmInstallRoot(scope, temporary);
+-        this.ensureNpmProject(installRoot);
+-        await this.runNpmCommand(this.getNpmInstallArgs([source.spec], installRoot));
++        await runNpmCommandExclusive(installRoot, () => {
++            this.ensureNpmProject(installRoot);
++            return this.runNpmCommand(this.getNpmInstallArgs([source.spec], installRoot));
++        });
+     }
+     async uninstallNpm(source, scope) {
+         const installRoot = this.getNpmInstallRoot(scope, false);
+@@ -1536,14 +1555,14 @@ export class DefaultPackageManager {
+         }
+         const packageManagerName = this.getPackageManagerName();
+         if (packageManagerName === "bun") {
+-            await this.runNpmCommand(["uninstall", source.name, "--cwd", installRoot]);
++            await runNpmCommandExclusive(installRoot, () => this.runNpmCommand(["uninstall", source.name, "--cwd", installRoot]));
+             return;
+         }
+         const args = ["uninstall", source.name, "--prefix", installRoot];
+         if (packageManagerName !== "pnpm") {
+             args.push("--legacy-peer-deps");
+         }
+-        await this.runNpmCommand(args);
++        await runNpmCommandExclusive(installRoot, () => this.runNpmCommand(args));
+     }
+     async installGit(source, scope) {
+         const targetDir = this.getGitInstallPath(source, scope);
