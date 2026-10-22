@@ -18,7 +18,9 @@ import { ackQuitDialog, setQuitGuard } from "../window";
 import { registerInvokeHandlers } from "./invoke";
 
 /** 项目仓库地址（帮助跳转 + 关于页） */
-const REPO_URL = "https://github.com/Jaxton07/percho";
+const REPO_URL = "https://github.com/Girwak/percho";
+
+const UPSTREAM_BASE_VERSION = "0.6.5";
 
 /**
  * 应用域：窗口级功能（不依赖 PiBackend 会话状态的部分也在此，backend 参数仅为对齐签名）。
@@ -66,6 +68,7 @@ export function registerAppIpc(_backend: PiBackend): void {
 		getAppInfo: () => ({
 			name: app.getName(),
 			version: app.getVersion(),
+			upstreamVersion: UPSTREAM_BASE_VERSION,
 			electron: process.versions.electron ?? "",
 			chrome: process.versions.chrome ?? "",
 			node: process.versions.node ?? "",

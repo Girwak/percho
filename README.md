@@ -9,11 +9,14 @@
   Highly customizable desktop GUI for the <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">Pi coding agent</a> — the same engine as the Pi CLI, in a clean visual interface. Multi-session chat, visual tool approvals, built-in subagents, UI plugins, and custom themes.
 </p>
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/Jaxton07/percho?style=flat-square" alt="License"></a>
-  <a href="https://github.com/Jaxton07/percho/releases"><img src="https://img.shields.io/github/v/release/Jaxton07/percho?style=flat-square" alt="Release"></a>
-  <a href="https://github.com/Jaxton07/percho/releases"><img src="https://img.shields.io/github/downloads/Jaxton07/percho/total?style=flat-square" alt="Downloads"></a>
-  <a href="https://github.com/Jaxton07/percho/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Jaxton07/percho/ci.yml?style=flat-square" alt="CI"></a>
-  <a href="https://github.com/Jaxton07/percho"><img src="https://img.shields.io/github/stars/Jaxton07/percho?style=flat-square" alt="Stars"></a>
+  Independently maintained <a href="https://github.com/Jaxton07/percho">fork</a>, versioned from <code>1.0.0</code> (current upstream base: <code>0.6.5</code>). See <a href="#fork-versioning">Fork versioning</a>.
+</p>
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Girwak/percho?style=flat-square" alt="License"></a>
+  <a href="https://github.com/Girwak/percho/releases"><img src="https://img.shields.io/github/v/release/Girwak/percho?style=flat-square" alt="Release"></a>
+  <a href="https://github.com/Girwak/percho/releases"><img src="https://img.shields.io/github/downloads/Girwak/percho/total?style=flat-square" alt="Downloads"></a>
+  <a href="https://github.com/Girwak/percho/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Girwak/percho/ci.yml?style=flat-square" alt="CI"></a>
+  <a href="https://github.com/Girwak/percho"><img src="https://img.shields.io/github/stars/Girwak/percho?style=flat-square" alt="Stars"></a>
   <img src="https://img.shields.io/badge/node-%3E%3D22.19-339933?logo=nodedotjs&style=flat-square" alt="Node >=22.19">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=flat-square" alt="macOS | Windows | Linux">
 </p>
@@ -22,6 +25,14 @@
 </p>
 
 ---
+
+## Fork versioning
+
+This repository is an independently maintained fork of [Jaxton07/percho](https://github.com/Jaxton07/percho):
+
+- Versions start from `1.0.0` and follow SemVer on their own line; the upstream base is tracked separately (`1.0.0` is based on upstream `0.6.5`) and shown in Settings → About.
+- Releases are published from this repo's tags (`v1.0.0`, …) and the in-app updater checks this repo.
+- Upstream is kept as a merge source: internal package names and architecture stay untouched; syncs merge upstream `main` periodically.
 
 ## Demo
 
