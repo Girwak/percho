@@ -21,6 +21,8 @@ import {
 	type ToolDefinition,
 } from "@earendil-works/pi-coding-agent";
 import type {
+	ArchiveConfigInfo,
+	ArchivedSessionMeta,
 	AvailableModel,
 	ChannelSubscriptionsSnapshot,
 	ContextManagerMode,
@@ -82,6 +84,18 @@ import { walkProjectFiles } from "./project/files";
 import { TrustGate } from "./project/trust";
 import { ProjectResourceLoader } from "./project/trust-loader";
 import { addAllowedPattern, addWorkspaceRoot } from "./project/workspace-store";
+import {
+	ARCHIVE_SWEEP_INTERVAL_MS,
+	archiveSessionFile,
+	deleteArchivedSessionFile,
+	purgeExpiredArchives,
+	getArchiveConfig as readArchiveConfig,
+	readArchivedSessions,
+	readArchiveRetentionDays,
+	reconcileArchiveManifest,
+	unarchiveSessionFile,
+	writeArchiveRetentionDays,
+} from "./session/archive";
 import { slimBulkyEvent, slimMessageUpdate } from "./session/event-slim";
 import { ExtensionDialogHost } from "./session/extension-dialog-host";
 import { SessionHydrationGate } from "./session/hydration-gate";
@@ -185,6 +199,10 @@ export interface PiBackendOptions {
 	 * 目前是 MCP 的 OAuth 授权页（spec §4.2）。缺省 → 官方内置扩展自行回落到平台默认浏览器。
 	 */
 	openExternal?: (url: string) => void | Promise<void>;
+	/** 归档根/settings.json 的定位根（测试用临时目录；缺省 getAgentDir()） */
+	agentDir?: string;
+	/** 启动归档对账 + 每 24h 清理过期归档（桌面端开启；测试/嵌入宿主缺省关） */
+	archiveSweeper?: boolean;
 }
 
 /**
@@ -273,6 +291,7 @@ export class PiBackend {
 			reloadIdleSessions: () => this.reloadIdleSessions(undefined),
 			defaultCwd: options.defaultCwd,
 		});
+		if (options.archiveSweeper) this.startArchiveSweeper();
 		this.projectLoader = new ProjectResourceLoader({
 			trustStore: this.trustStore,
 			ask: (dir, opts) => this.trustGate.ask(dir, opts),
@@ -875,6 +894,72 @@ export class PiBackend {
 		if (sessionDir) await TraceRecorder.removeAll(sessionDir, sessionId);
 		this.channelSubs.delete(sessionId);
 		log.info("session deleted", sessionId);
+	}
+
+	private archiveAgentDir(): string {
+		return this.options.agentDir ?? getAgentDir();
+	}
+
+	private archiveTimer: NodeJS.Timeout | undefined;
+
+	private startArchiveSweeper(): void {
+		const agentDir = this.archiveAgentDir();
+		try {
+			reconcileArchiveManifest(agentDir);
+		} catch (error) {
+			log.warn("archive manifest reconcile failed", error);
+		}
+		const sweep = (): void => {
+			void purgeExpiredArchives(agentDir, readArchiveRetentionDays(agentDir)).catch((error: unknown) => {
+				log.warn("archive sweep failed", error);
+			});
+		};
+		sweep();
+		this.archiveTimer = setInterval(sweep, ARCHIVE_SWEEP_INTERVAL_MS);
+		this.archiveTimer.unref();
+	}
+
+	/** 归档会话（活跃会话先 dispose 再移文件；traces 一并删除，恢复后继续会话会自动新建） */
+	async archiveSession(sessionId: string, sessionFile?: string): Promise<void> {
+		const entry = this.registry.get(sessionId);
+		const sessionDir = entry?.session.sessionManager.getSessionDir();
+		const file = sessionFile ?? entry?.session.sessionManager.getSessionFile();
+		if (entry) await this.disposeSession(entry);
+		if (!file) throw new Error(`Session file not found: ${sessionId}`);
+		if (sessionDir) await TraceRecorder.removeAll(sessionDir, sessionId);
+		archiveSessionFile(sessionId, file, this.archiveAgentDir());
+		this.channelSubs.delete(sessionId);
+		log.info("session archived", sessionId);
+	}
+
+	async unarchiveSession(sessionFile: string): Promise<void> {
+		unarchiveSessionFile(sessionFile, this.archiveAgentDir());
+	}
+
+	async listArchivedSessions(): Promise<ArchivedSessionMeta[]> {
+		const agentDir = this.archiveAgentDir();
+		return readArchivedSessions(agentDir, readArchiveRetentionDays(agentDir));
+	}
+
+	async deleteArchivedSession(sessionFile: string): Promise<void> {
+		deleteArchivedSessionFile(sessionFile, this.archiveAgentDir());
+		log.info("archived session deleted", sessionFile);
+	}
+
+	async purgeExpiredArchivedSessions(): Promise<number> {
+		const agentDir = this.archiveAgentDir();
+		const purged = await purgeExpiredArchives(agentDir, readArchiveRetentionDays(agentDir));
+		if (purged > 0) log.info(`purged ${purged} expired archive(s)`);
+		return purged;
+	}
+
+	getArchiveConfig(): ArchiveConfigInfo {
+		return readArchiveConfig(this.archiveAgentDir());
+	}
+
+	async setArchiveRetention(days: number | null): Promise<ArchiveConfigInfo> {
+		writeArchiveRetentionDays(this.archiveAgentDir(), days);
+		return this.getArchiveConfig();
 	}
 
 	async prompt(sessionId: string, text: string, images?: ImageInput[]): Promise<void> {
@@ -1658,6 +1743,10 @@ export class PiBackend {
 	}
 
 	dispose(): void {
+		if (this.archiveTimer) {
+			clearInterval(this.archiveTimer);
+			this.archiveTimer = undefined;
+		}
 		this.registry.disposeAll({
 			beforeShutdown: (entry) => {
 				this.beforeSessionShutdown(entry);

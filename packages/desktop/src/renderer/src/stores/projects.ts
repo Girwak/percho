@@ -63,6 +63,8 @@ interface ProjectsStore {
 	addProject: () => Promise<void>;
 	/** 删除历史会话（含磁盘文件）；若该会话在顶栏打开中则一并关闭 */
 	deleteSession: (session: SessionMeta) => Promise<void>;
+	/** 归档历史会话（移入 archived-sessions，侧栏消失；设置窗口「会话归档」可恢复/删除） */
+	archiveSession: (session: SessionMeta) => Promise<void>;
 	/** 删除整个项目：删除该项目下全部会话（含磁盘文件），并从已添加列表移除 */
 	deleteProject: (cwd: string) => Promise<void>;
 	/** 从历史会话打开并切回聊天视图；若已在内存里则直接切换。**用户入口**：真正打开成功后才记入工作区 */
@@ -74,6 +76,30 @@ interface ProjectsStore {
  * `allSessions/loading/loaded`。模块级：不落盘、不进 store，重载归零也无意义。
  */
 let loadSeq = 0;
+
+/** 会话移出目录（删除/归档共用）后的全局残留清理：置顶、权限模式记忆、工作区成员、子代理返回链、频道订阅。 */
+function forgetSessionSideEffects(sessionId: string): void {
+	// 置顶列表清理：会话没了就没人能取消置顶，留着会变成永久残留 id
+	useUiPreferencesStore.getState().unpin(sessionId);
+	// D7：权限模式记录同理（与置顶并列；卸载/关会话**不**清，那是「记住」的意义）
+	useUiPreferencesStore.getState().forgetPermissionMode(sessionId);
+	// 工作区成员同理清理（**只有删除/归档**会顺带移出；关会话/卸载不自动移出，见 spec）
+	useSessionWorkspaceStore.getState().removeMember(sessionId);
+	// spec D4：会话没了则与它相关的关系失效 —— 作为父（子会话的返回箭头）与作为子（自己的箭头）都清。
+	// GC 卸载要靠 parentFile 重开父会话，清了箭头就没了（删除/归档不能与 GC 混用）。
+	useSubagentReturnStore.getState().forgetChildrenOf(sessionId);
+	useSubagentReturnStore.getState().forgetChild(sessionId);
+	// 频道订阅快照同理（关闭路径上 sessions.closeSession 不一定跑到，幂等清一次）
+	useChannelSubscriptionsStore.getState().forget(sessionId);
+}
+
+/** 会话在顶栏打开中则关闭（删除/归档共用）；未加载则无事发生 */
+async function closeSessionIfLoaded(sessionId: string): Promise<void> {
+	const sessionsState = useSessionsStore.getState();
+	if (sessionsState.sessions.some((s) => s.sessionId === sessionId)) {
+		await sessionsState.closeSession(sessionId);
+	}
+}
 
 export const useProjectsStore = create<ProjectsStore>((set, get) => {
 	/**
@@ -151,22 +177,18 @@ export const useProjectsStore = create<ProjectsStore>((set, get) => {
 
 		deleteSession: async (session) => {
 			await getPi().deleteSession({ sessionId: session.sessionId, sessionFile: session.sessionFile });
-			// 置顶列表清理：会话没了就没人能取消置顶，留着会变成永久残留 id
-			useUiPreferencesStore.getState().unpin(session.sessionId);
-			// D7：权限模式记录同理（与置顶并列；卸载/关会话**不**清，那是「记住」的意义）
-			useUiPreferencesStore.getState().forgetPermissionMode(session.sessionId);
-			// 工作区成员同理清理（**只有删除**会顺带移出；关会话/卸载不自动移出，见 spec）
-			useSessionWorkspaceStore.getState().removeMember(session.sessionId);
-			// spec D4：会话被删则与它相关的关系失效 —— 作为父（子会话的返回箭头）与作为子（自己的箭头）都清。
-			// **只有删除**清：GC 卸载要靠 parentFile 重开父会话，清了箭头就没了（两者不能混用）。
-			useSubagentReturnStore.getState().forgetChildrenOf(session.sessionId);
-			useSubagentReturnStore.getState().forgetChild(session.sessionId);
-			// 频道订阅快照同理（删除路径上 sessions.closeSession 不一定跑到，幂等清一次）
-			useChannelSubscriptionsStore.getState().forget(session.sessionId);
-			const sessionsState = useSessionsStore.getState();
-			if (sessionsState.sessions.some((s) => s.sessionId === session.sessionId)) {
-				await sessionsState.closeSession(session.sessionId);
-			}
+			forgetSessionSideEffects(session.sessionId);
+			await closeSessionIfLoaded(session.sessionId);
+			set((state) => ({
+				allSessions: state.allSessions.filter((s) => s.sessionId !== session.sessionId),
+			}));
+		},
+
+		archiveSession: async (session) => {
+			await getPi().archiveSession({ sessionId: session.sessionId, sessionFile: session.sessionFile });
+			// 与删除同一条残留清理链：会话已不在目录里，置顶/权限记忆/成员表/返回链/订阅都必须带走
+			forgetSessionSideEffects(session.sessionId);
+			await closeSessionIfLoaded(session.sessionId);
 			set((state) => ({
 				allSessions: state.allSessions.filter((s) => s.sessionId !== session.sessionId),
 			}));

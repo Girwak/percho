@@ -10,6 +10,7 @@ import { type SettingsCategory, useSettingsStore } from "../../stores/settings";
 import { useUiPluginsStore } from "../../stores/ui-plugins";
 import { AboutPanel } from "./AboutPanel";
 import { AppearancePanel } from "./AppearancePanel";
+import { ArchivePanel } from "./ArchivePanel";
 import { ExtensionsPanel } from "./extensions/ExtensionsPanel";
 import { GeneralPanel } from "./GeneralPanel";
 import { LanObserverPanel } from "./LanObserverPanel";
@@ -24,6 +25,7 @@ const STATIC_CATEGORIES = [
 	"skills",
 	"mcp",
 	"extensions",
+	"archive",
 	"lan",
 	"about",
 ] as const satisfies readonly SettingsCategory[];
@@ -36,6 +38,7 @@ const PANELS: Partial<Record<SettingsCategory, ComponentType>> = {
 	skills: SkillsPanel,
 	mcp: McpPanel,
 	extensions: ExtensionsPanel,
+	archive: ArchivePanel,
 	lan: LanObserverPanel,
 	about: AboutPanel,
 };
