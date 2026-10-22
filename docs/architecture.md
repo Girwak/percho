@@ -55,6 +55,6 @@ UI 插件的槽位/区域标识以 shared `ui-plugins.ts` 为单源。新增对�
 
 正式 agent 数据在 `~/.pi/agent/`，与 CLI 共享；开发/预览通过 `main/dev-agent-dir.ts` 隔离到 `~/.pi/agent-dev/`，Electron userData 使用 `-dev` 后缀。具体开发路径与实例管理见 [UI 调试](ui-debugging.md)。
 
-权限模式属于会话，不是改写全局权限规则；第三方扩展的通用 confirm 不是工具授权。MCP/第三方工具无只读声明时不能默认放行，求值链以 backend `permissions/` 为准。
+权限模式属于会话，不是改写全局权限规则；第三方扩展的通用 confirm 不是工具授权。模式三档：chatOnly（只读白名单，读工具照走求值链，写/命令/子代理/MCP 直接拦截，并由 backend 在每轮注入只读纪律段到 system prompt）、default（按规则审批）、fullAccess（一切放行 + 高危调用写审计）。MCP/第三方工具无只读声明时不能默认放行，求值链以 backend `permissions/` 为准。
 
 凭证不写入文档、日志或测试夹具；重放和验收使用隔离数据，不把正式目录当可变测试环境。

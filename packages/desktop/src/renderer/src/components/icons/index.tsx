@@ -127,6 +127,23 @@ export function WarningIcon({ size = 14, className }: IconProps) {
 	);
 }
 
+export function ChatIcon({ size = 14, className }: IconProps) {
+	return (
+		<svg
+			className={className}
+			width={size}
+			height={size}
+			viewBox="0 0 24 24"
+			{...strokeProps}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+		</svg>
+	);
+}
+
 /** 右箭头（错误卡展开 chevron） */
 export function ChevronRightIcon({ size = 12, className }: IconProps) {
 	return (

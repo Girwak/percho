@@ -345,8 +345,8 @@ export interface PermissionConfigInfo {
 	enabled: boolean;
 }
 
-/** 会话权限模式：default = 按规则审批；fullAccess = 一切放行 + 高危调用写审计。按会话内存态，不落盘、不跨会话继承、重启归零。 */
-export type PermissionMode = "default" | "fullAccess";
+/** 会话权限模式：chatOnly = 只读白名单（读工具放行，写/命令/子代理拦截）；default = 按规则审批；fullAccess = 一切放行 + 高危调用写审计。后端按会话内存态，重启后由 renderer 依 ui-state.json 的 sessionPermissionModes 记忆恢复。 */
+export type PermissionMode = "chatOnly" | "default" | "fullAccess";
 
 /**
  * 关闭会话的调用意图：
