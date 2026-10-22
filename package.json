@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"description": "Desktop GUI for the Pi coding agent, built with Electron",
 	"license": "MIT",
-	"author": "Jaxton07",
+	"author": "Girwak",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Girwak/percho.git"

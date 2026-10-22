@@ -3,6 +3,8 @@ import { homedir, tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
+	BeforeAgentStartEvent,
+	BeforeAgentStartEventResult,
 	ExtensionAPI,
 	ExtensionContext,
 	ExtensionHandler,
@@ -20,6 +22,11 @@ import { isTemporaryPath } from "../src/permissions/tmp-zone";
 import { workspaceConfigPath } from "../src/project/workspace-store";
 
 type ToolCallHandler = ExtensionHandler<ToolCallEvent, ToolCallEventResult>;
+
+type BeforeAgentStartHandler = ExtensionHandler<
+	BeforeAgentStartEvent,
+	BeforeAgentStartEventResult
+>;
 
 type PermissionModeRef = { current: PermissionMode };
 
@@ -90,9 +97,11 @@ function makeHarness(
 		throw new Error("expected named inline extension");
 	}
 	let handler: ToolCallHandler | undefined;
+	let beforeAgentStart: BeforeAgentStartHandler | undefined;
 	const pi = {
-		on: (event: string, h: ToolCallHandler) => {
+		on: (event: string, h: ToolCallHandler | BeforeAgentStartHandler) => {
 			if (event === "tool_call") handler = h;
+			if (event === "before_agent_start") beforeAgentStart = h;
 		},
 		getAllTools: () => options?.tools ?? [],
 	};
@@ -112,7 +121,12 @@ function makeHarness(
 
 	const call = (toolName: string, input: Record<string, unknown>) =>
 		handler({ type: "tool_call", toolCallId: "tc-1", toolName, input } as ToolCallEvent, ctx);
-	return { call, confirms };
+	const submit = (systemPrompt: string) =>
+		beforeAgentStart?.(
+			{ type: "before_agent_start", prompt: "hi", systemPrompt } as BeforeAgentStartEvent,
+			ctx,
+		);
+	return { call, confirms, submit };
 }
 
 describe("permission-gate 扩展", () => {
@@ -404,8 +418,8 @@ describe("permission-gate 扩展", () => {
 		if (typeof extension === "function" || !("factory" in extension)) throw new Error("unexpected");
 		let handler: ToolCallHandler | undefined;
 		extension.factory({
-			on: (_event: string, h: ToolCallHandler) => {
-				handler = h;
+			on: (event: string, h: ToolCallHandler | BeforeAgentStartHandler) => {
+				if (event === "tool_call") handler = h;
 			},
 		} as unknown as ExtensionAPI);
 
@@ -613,5 +627,111 @@ describe("权限模式（fullAccess = 一切放行 + 高危审计）", () => {
 		const entries = readAudit(dir);
 		expect(entries).toHaveLength(1);
 		expect(entries[0]).toMatchObject({ action: "ask", tool: "bash" });
+	});
+});
+
+describe("权限模式（chatOnly = 只读白名单）", () => {
+	it("chatOnly：写工具直接拦截（edit），reason 引导向文本描述，不弹窗、不写审计", async () => {
+		const dir = makeAgentDir();
+		const { call, confirms } = makeHarness(dir, false, { mode: { current: "chatOnly" } });
+		const result = await call("edit", { path: "/tmp/a.ts" });
+		expect(result).toMatchObject({ block: true });
+		expect((result as ToolCallEventResult).reason).toContain("Chat-only mode is active");
+		expect(confirms).toHaveLength(0);
+		expect(readAudit(dir)).toHaveLength(0);
+	});
+
+	it("chatOnly：bash/subagent/MCP/未知工具全部拦截（default-deny）", async () => {
+		const dir = makeAgentDir();
+		const { call, confirms } = makeHarness(dir, true, {
+			mode: { current: "chatOnly" },
+			tools: [toolInfo("mcp__docs__search", { path: "builtin:mcp", readOnlyHint: true })],
+		});
+		for (const name of ["bash", "powershell", "truncate", "subagent", "webfetch", "mcp__docs__search", "totally_unknown"]) {
+			await expect(call(name, {})).resolves.toMatchObject({ block: true });
+		}
+		expect(confirms).toHaveLength(0);
+	});
+
+	it("chatOnly：read 白名单放行（read/grep/find/ls/show_image）", async () => {
+		const dir = makeAgentDir();
+		const { call, confirms } = makeHarness(dir, false, {
+			mode: { current: "chatOnly" },
+			tools: [toolInfo("show_image", { path: "<sdk:show_image>", readOnlyHint: true })],
+		});
+		await expect(call("read", { path: "/etc/hosts" })).resolves.toBeUndefined();
+		await expect(call("grep", { pattern: "x", path: "/etc" })).resolves.toBeUndefined();
+		await expect(call("find", { pattern: "*.ts", path: "/etc" })).resolves.toBeUndefined();
+		await expect(call("ls", { path: "/etc" })).resolves.toBeUndefined();
+		await expect(call("show_image", { paths: ["/tmp/a.png"] })).resolves.toBeUndefined();
+		expect(confirms).toHaveLength(0);
+	});
+
+	it("chatOnly：读者照走求值链——显式 deny 规则不被白名单绕过", async () => {
+		const dir = makeAgentDir();
+		writeFileSync(
+			join(dir, "permissions.json"),
+			JSON.stringify({ rules: { read: { "/etc/secrets*": "deny" } } }),
+		);
+		const { call } = makeHarness(dir, false, { mode: { current: "chatOnly" } });
+		const result = await call("read", { path: "/etc/secrets/key.pem" });
+		expect(result).toMatchObject({ block: true });
+		expect((result as ToolCallEventResult).reason).toContain("permission rule");
+	});
+
+	it("chatOnly：读者仍吃 outside.read=ask 收紧（白名单不是无条件放行）", async () => {
+		const dir = makeAgentDir();
+		writeFileSync(join(dir, "permissions.json"), JSON.stringify({ outside: { read: "ask" } }));
+		const root = join(dir, "proj");
+		mkdirSync(root, { recursive: true });
+		const { call, confirms } = makeHarness(dir, false, {
+			projectRoot: root,
+			mode: { current: "chatOnly" },
+		});
+		await expect(call("read", { path: "/etc/hosts" })).resolves.toMatchObject({ block: true });
+		expect(confirms).toHaveLength(1);
+	});
+
+	it("chatOnly：tmp 豁免不惠及写工具（write 落临时区同样拦截）", async () => {
+		const dir = makeAgentDir();
+		const { call } = makeHarness(dir, false, { mode: { current: "chatOnly" } });
+		await expect(call("write", { path: `${resolve(tmpdir())}/x.ts` })).resolves.toMatchObject({
+			block: true,
+		});
+	});
+
+	it("chatOnly：enabled=false 逃生舱仍优先（整体放行，无审计）", async () => {
+		const dir = makeAgentDir();
+		writeFileSync(join(dir, "permissions.json"), JSON.stringify({ enabled: false }));
+		const { call } = makeHarness(dir, false, { mode: { current: "chatOnly" } });
+		await expect(call("bash", { command: "rm -rf /" })).resolves.toBeUndefined();
+		await expect(call("write", { path: "/etc/hosts" })).resolves.toBeUndefined();
+		expect(readAudit(dir)).toHaveLength(0);
+	});
+
+	it("chatOnly：模式切换即时生效（default→chatOnly→default 逐调用跟随）", async () => {
+		const dir = makeAgentDir();
+		const mode: PermissionModeRef = { current: "default" };
+		const { call } = makeHarness(dir, false, { mode });
+		await expect(call("edit", { path: "/tmp/a.ts" })).resolves.toBeUndefined();
+		mode.current = "chatOnly";
+		await expect(call("edit", { path: "/tmp/a.ts" })).resolves.toMatchObject({ block: true });
+		mode.current = "default";
+		await expect(call("edit", { path: "/tmp/a.ts" })).resolves.toBeUndefined();
+	});
+
+	it("chatOnly：before_agent_start 注入只读纪律段；其它模式返回 undefined；切回复原", async () => {
+		const dir = makeAgentDir();
+		const mode: PermissionModeRef = { current: "default" };
+		const { submit } = makeHarness(dir, false, { mode });
+		const base = "BASE SYSTEM PROMPT";
+		expect(submit(base)).toBeUndefined();
+		mode.current = "chatOnly";
+		const injected = await submit(base);
+		expect(injected?.systemPrompt?.startsWith(base)).toBe(true);
+		expect(injected?.systemPrompt).toContain("## Session mode: chat-only");
+		expect(injected?.systemPrompt).toContain("read, grep, find, ls, show_image");
+		mode.current = "default";
+		expect(submit(base)).toBeUndefined();
 	});
 });

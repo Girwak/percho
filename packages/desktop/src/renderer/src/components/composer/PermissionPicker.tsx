@@ -1,13 +1,40 @@
 import type { PermissionMode } from "@percho/shared";
-import { useEffect, useRef, useState } from "react";
-import { useT } from "../../i18n";
+import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useT, type MessageKey } from "../../i18n";
 import { useSessionsStore } from "../../stores/sessions";
 import { useSettingsStore } from "../../stores/settings";
-import { CheckIcon, ShieldIcon, WarningIcon } from "../icons";
+import { ChatIcon, CheckIcon, ShieldIcon, WarningIcon } from "../icons";
 import { Tooltip } from "../ui/Tooltip";
 
-/** 档位定义：glyph / 标题 / 描述（spec permission-mode §6） */
-const MODES: PermissionMode[] = ["default", "fullAccess"];
+/** 档位定义：glyph / 标题 / 描述（spec permission-mode §6，chat-only-mode.md） */
+const MODES: PermissionMode[] = ["chatOnly", "default", "fullAccess"];
+
+const MODE_META: Record<
+	PermissionMode,
+	{
+		icon: ComponentType<{ size: number; className?: string }>;
+		title: MessageKey;
+		desc: MessageKey;
+		warn?: boolean;
+	}
+> = {
+	chatOnly: {
+		icon: ChatIcon,
+		title: "composer.permissionChatOnlyTitle",
+		desc: "composer.permissionChatOnlyDesc",
+	},
+	default: {
+		icon: ShieldIcon,
+		title: "composer.permissionDefaultTitle",
+		desc: "composer.permissionDefaultDesc",
+	},
+	fullAccess: {
+		icon: WarningIcon,
+		title: "composer.permissionFullAccessTitle",
+		desc: "composer.permissionFullAccessDesc",
+		warn: true,
+	},
+};
 
 /**
  * 会话权限档位 chip（仿 ModelPicker：按钮 + 上弹层 + 外部点击/Esc 关闭）。
@@ -53,16 +80,17 @@ export function PermissionPicker() {
 		<button
 			type="button"
 			className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-ui-12 leading-[calc(1_/_0.75)] transition-colors hover:bg-hover ${
-				mode === "fullAccess" ? "text-warn hover:text-warn" : "text-ink-dim hover:text-ink"
+				MODE_META[mode].warn ? "text-warn hover:text-warn" : "text-ink-dim hover:text-ink"
 			} ${gateOff ? "cursor-not-allowed opacity-40 hover:bg-transparent" : ""}`}
 			aria-label={t("composer.permissionMode")}
 			disabled={gateOff === true}
 			onClick={() => setOpen((v) => !v)}
 		>
-			{mode === "fullAccess" ? <WarningIcon size={12} /> : <ShieldIcon size={12} />}
-			<span>
-				{mode === "fullAccess" ? t("composer.permissionFullAccess") : t("composer.permissionDefault")}
-			</span>
+			{(() => {
+				const Glyph = MODE_META[mode].icon;
+				return <Glyph size={12} />;
+			})()}
+			<span>{t(MODE_META[mode].title)}</span>
 		</button>
 	);
 
@@ -96,21 +124,17 @@ export function PermissionPicker() {
 									setOpen(false);
 								}}
 							>
-								{m === "fullAccess" ? (
-									<WarningIcon size={13} className="mt-0.5 shrink-0 text-warn" />
-								) : (
-									<ShieldIcon size={13} className="mt-0.5 shrink-0 text-ink-dim" />
-								)}
+								{(() => {
+									const meta = MODE_META[m];
+									const Glyph = meta.icon;
+									return <Glyph size={13} className={`mt-0.5 shrink-0 ${meta.warn ? "text-warn" : "text-ink-dim"}`} />;
+								})()}
 								<span className="min-w-0 flex-1">
 									<span className="block text-ui-12 leading-[calc(1_/_0.75)] font-medium">
-										{m === "fullAccess"
-											? t("composer.permissionFullAccessTitle")
-											: t("composer.permissionDefaultTitle")}
+										{t(MODE_META[m].title)}
 									</span>
 									<span className="mt-0.5 block text-ui-11 leading-relaxed text-ink-faint">
-										{m === "fullAccess"
-											? t("composer.permissionFullAccessDesc")
-											: t("composer.permissionDefaultDesc")}
+										{t(MODE_META[m].desc)}
 									</span>
 								</span>
 								{selected && <CheckIcon size={12} className="mt-1 shrink-0" />}

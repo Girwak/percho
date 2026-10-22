@@ -1,5 +1,6 @@
 appId: io.github.girwak.percho
 productName: Percho
+copyright: Copyright © 2026 Girwak
 directories:
   output: dist
 files:

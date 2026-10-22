@@ -25,6 +25,15 @@ const READ_TOOLS = new Set(["read", "ls", "show_image"]);
 const WRITE_TOOLS = new Set(["edit", "write"]);
 const PATH_TOOLS = new Set([...READ_TOOLS, ...WRITE_TOOLS]);
 
+const CHAT_ONLY_READ_TOOLS = new Set(["read", "grep", "find", "ls", "show_image"]);
+
+const CHAT_ONLY_PROMPT_SECTION = [
+	"## Session mode: chat-only",
+	"This session is read-only. Allowed tools: read, grep, find, ls, show_image.",
+	"edit, write, bash, subagents and MCP tools are blocked at platform level and will fail every time — do not attempt them or work around them.",
+	"When a change is needed, present it as text (code block, diff, or steps) and let the user apply it. Reading files to ground the discussion is encouraged.",
+].join("\n");
+
 /** 确认通道：携带 kind/suggestDir 元数据（PiBackend 桥到 PermissionGate.confirm） */
 export type PermissionConfirm = (
 	title: string,
@@ -58,6 +67,9 @@ export type PermissionModeRef = { current: PermissionMode };
  * mode=fullAccess（spec permission-mode D2/D4）：求值链照跑，default 档下会被 deny/ask
  * 的调用降级为「写审计 + 放行」（项目记忆命中的不记，与 default 档口径一致）；deny 与
  * ask 同样降级——一切放行，含自保护规则（用户明示接受的语义）。
+ * mode=chatOnly：读工具白名单前置分支（read/grep/find/ls/show_image 照走求值链，
+ * 显式 deny 规则仍生效），其余工具直接拦截；before_agent_start 注入只读纪律段
+ * （.local/docs/design/chat-only-mode.md）。
  * 边界检查只覆盖路径工具：bash 无法用路径模式约束（cd 任意跳），符号链接逃逸不在范围。
  */
 export function makePermissionGateExtension(
@@ -74,6 +86,16 @@ export function makePermissionGateExtension(
 			pi.on("tool_call", async (event, ctx) => {
 				const config = loadConfig();
 				if (!config.enabled) return;
+				if (
+					(options?.getMode?.() ?? "default") === "chatOnly" &&
+					!CHAT_ONLY_READ_TOOLS.has(event.toolName)
+				) {
+					log.info("tool blocked in chatOnly mode", event.toolName);
+					return {
+						block: true,
+						reason: `Chat-only mode is active: only read tools (read, grep, find, ls, show_image) are allowed; "${event.toolName}" is blocked, and retries or workarounds (bash, MCP, subagents) will also fail. Do not attempt modifications — describe the change as text and let the user apply it.`,
+					};
+				}
 				// fullAccess：一切放行 + 高危留痕（每次 tool_call 实时读，切换即时生效）
 				const fullAccess = options?.getMode?.() === "fullAccess";
 				const input = (event.input ?? {}) as Record<string, unknown>;
@@ -215,6 +237,11 @@ export function makePermissionGateExtension(
 					block: true,
 					reason: `User denied this ${event.toolName} call (${title}). Do not retry the same action; ask the user or find another approach.`,
 				};
+			});
+
+			pi.on("before_agent_start", (event) => {
+				if ((options?.getMode?.() ?? "default") !== "chatOnly") return;
+				return { systemPrompt: `${event.systemPrompt}\n\n${CHAT_ONLY_PROMPT_SECTION}` };
 			});
 		},
 	};
