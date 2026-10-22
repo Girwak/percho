@@ -23,6 +23,14 @@
 - Monaco 是 JS 度量例外，复用 `monacoFontSizeFor` / `monacoLineHeightFor`。当前 Markdown 库只在创建编辑器时应用字号，换档需要重建代码块，不要误以为 CSS 变量会自动更新它。
 - 修改后运行现有 typography 守护测试；专项验收查 `scripts/check-font-size.mjs` 文件头。
 
+## 聊天列宽只有一处
+
+对话区居中列宽度只在 `MessageList.tsx` 的 `data-chat-column` 节点定义，两档由设置页外观区切换（shared `UiState.chatColumnWidthMode`）：
+
+- `default` = 760px 排版宽；`wide` = `max-w-[min(90%,1600px)]`，上限常量 `CHAT_COLUMN_WIDE_MAX_WIDTH` 在 shared（改 Tailwind 任意值时同步改它）。
+- 消息内 85%/百分比宽度全部相对列宽自动跟随，改列宽不要逐个改消息组件。
+- 持久化走 `ui-state.json`（main `ui-state.ts` normalize 只认两枚举值，脏值回 `default`），与字号同源。
+
 ## 浮层与交互
 
 - fixed 浮层通过 `createPortal(..., document.body)` 挂载。`.edge-fade` 的 mask 会裁剪整个绘制子树，子元素 rect 正确也可能只绘制出一部分。

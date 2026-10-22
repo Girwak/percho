@@ -57,6 +57,7 @@ export function MessageList() {
 	// 滞后缓冲只在 run 存活期内生效：正文在输出或 run 已终结（!agentActive）时立即结束——
 	// 杜绝结束/中止后的 1.5s 滞留；resetKey=会话 id：切会话立即对齐新信号，不滞留旧动画
 	const centerOrbEnabled = useUiPreferencesStore((s) => s.centerOrbEnabled);
+	const chatColumnWidthMode = useUiPreferencesStore((s) => s.chatColumnWidthMode);
 	const shownWorking = useShownWorking(
 		agentWorking,
 		transcript.compacting || Boolean(streaming?.text) || !transcript.agentActive,
@@ -334,10 +335,17 @@ export function MessageList() {
 				className="edge-fade chat-scrollbar relative z-10 h-full overflow-x-hidden overflow-y-auto [overflow-anchor:auto] [scrollbar-gutter:stable]"
 			>
 				{/* data-chat-column：对话区列的几何锚点（「返回父会话」入口靠它把自己摆到左侧空带正中，见 subagent-back-offset.ts） */}
+				{/* 列宽两档（设置页外观区切换）：default = 760px 排版宽；wide = 可视区 90% 封顶
+				    CHAT_COLUMN_WIDE_MAX_WIDTH（纯 Tailwind 任意值，长度上限在 shared 常量里同步维护）；
+				    消息内 85%/百分比宽度全部相对列宽自动跟随，无需逐个改 */}
 				<div
 					ref={contentRef}
 					data-chat-column
-					className="mx-auto flex max-w-[760px] flex-col gap-6 px-6 pt-8 pb-16"
+					className={
+						chatColumnWidthMode === "wide"
+							? "mx-auto flex max-w-[min(90%,1600px)] flex-col gap-6 px-6 pt-8 pb-16"
+							: "mx-auto flex max-w-[760px] flex-col gap-6 px-6 pt-8 pb-16"
+					}
 				>
 					{/* root 私有接线：历史图片靠它判断「是否在滚动容器可视区内」，拿不到就只渲染占位 */}
 					<HistoryImageRootProvider root={historyImageRoot}>
