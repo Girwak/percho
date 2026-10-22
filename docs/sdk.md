@@ -40,7 +40,7 @@
 
 1. 核对依赖实际解析版本：`PI_PACKAGE_DIR` 可影响 SDK 导出的 VERSION，不能据它判断 node_modules 的版本；参考 `scripts/smoke-sdk-1.0.mts` 的 `import.meta.resolve` 检查。
 2. 阅读目标版本类型与实现，重点核对扩展生命周期、工具优先级、上下文/压缩形状和持久化时机；typecheck 通过不代表行为未变。
-3. 核对 `patches/`：当前 SDK 补丁提供 `retryLastFailedTurn`。升级先查官方是否已有等价入口，再评估补丁，不能悄悄丢掉能力。
+3. 核对 `patches/`：当前 SDK 补丁提供 `retryLastFailedTurn`，并把 `package-manager.js` 的 npm 安装/卸载按安装根目录串行化（并发 `npm install --prefix` 会在解包时互相踩踏损坏 node_modules，症状是 dev 首启 ENOENT 风暴与会话创建失败；上游 1.3.0 仍无互斥）。升级先查官方是否已有等价入口，再评估补丁，不能悄悄丢掉能力。
 4. 手动重试复用 SDK 原恢复生命周期，不重发用户任务，也不只调用底层 continue；验证失败响应身份、busy 状态与 live/replay 的定位一致性。
 5. 跑 `smoke-sdk-1.0.mts`（升级后按实际版本更新口径）、全量 typecheck/test，以及相关专项冒烟；含真实网络/凭证的脚本先读文件头，不自动拿用户凭证执行。
 6. 构建并核对随包 SDK 资源、preload 与原生依赖，见 [构建发布](build-release.md)。
