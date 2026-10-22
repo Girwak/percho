@@ -9,11 +9,14 @@
   高度自定义的 <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">Pi coding agent</a> 桌面端 GUI —— 与 Pi CLI 同源同引擎，干净清爽的视觉界面。多会话聊天、可视化工具审批、内置子代理、UI 插件、自定义主题。
 </p>
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/Jaxton07/percho?style=flat-square" alt="License"></a>
-  <a href="https://github.com/Jaxton07/percho/releases"><img src="https://img.shields.io/github/v/release/Jaxton07/percho?style=flat-square" alt="Release"></a>
-  <a href="https://github.com/Jaxton07/percho/releases"><img src="https://img.shields.io/github/downloads/Jaxton07/percho/total?style=flat-square" alt="Downloads"></a>
-  <a href="https://github.com/Jaxton07/percho/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Jaxton07/percho/ci.yml?style=flat-square" alt="CI"></a>
-  <a href="https://github.com/Jaxton07/percho"><img src="https://img.shields.io/github/stars/Jaxton07/percho?style=flat-square" alt="Stars"></a>
+  <a href="https://github.com/Jaxton07/percho">上游项目</a>的独立维护 Fork，版本号自 <code>1.0.0</code> 起独立演进（当前基于上游 <code>0.6.5</code>），详见 <a href="#fork-版本方案">Fork 版本方案</a>。
+</p>
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Girwak/percho?style=flat-square" alt="License"></a>
+  <a href="https://github.com/Girwak/percho/releases"><img src="https://img.shields.io/github/v/release/Girwak/percho?style=flat-square" alt="Release"></a>
+  <a href="https://github.com/Girwak/percho/releases"><img src="https://img.shields.io/github/downloads/Girwak/percho/total?style=flat-square" alt="Downloads"></a>
+  <a href="https://github.com/Girwak/percho/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Girwak/percho/ci.yml?style=flat-square" alt="CI"></a>
+  <a href="https://github.com/Girwak/percho"><img src="https://img.shields.io/github/stars/Girwak/percho?style=flat-square" alt="Stars"></a>
   <img src="https://img.shields.io/badge/node-%3E%3D22.19-339933?logo=nodedotjs&style=flat-square" alt="Node >=22.19">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=flat-square" alt="macOS | Windows | Linux">
 </p>
@@ -22,6 +25,14 @@
 </p>
 
 ---
+
+## Fork 版本方案
+
+本仓库是 [Jaxton07/percho](https://github.com/Jaxton07/percho) 的独立维护 Fork：
+
+- 版本号自 `1.0.0` 起按 SemVer 独立演进；上游基线单独记录（`1.0.0` 基于上游 `0.6.5`），在「设置 → 关于」中展示。
+- 发版在本仓库打 tag（`v1.0.0`、…）由 CI 构建，应用内更新检查指向本仓库 Releases。
+- 保留与上游的合并能力：内部包名与架构不动，定期合并上游 `main`。
 
 ## 演示
 

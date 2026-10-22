@@ -49,6 +49,8 @@ npx asar extract packages/desktop/dist/mac-arm64/Percho.app/Contents/Resources/a
 
 ## 发布与平台验证
 
+版本号方案（fork）：`packages/desktop/package.json` 的 `version` 自 `1.0.0` 起独立演进，打同名 tag `vX.Y.Z` 触发 `release.yml`；上游基线单独记录在 `packages/desktop/src/main/ipc/app.ts` 的 `UPSTREAM_BASE_VERSION`（关于页展示），同步上游后手动递增。应用内更新源指向本仓库（`electron-builder.yml` 的 `publish.owner/repo`）。
+
 本机维护者的 tag、签名、网络等操作见 `.local/docs/release.md`（不入库）；文件不存在时从仓库 workflow 和 builder 配置核对，不猜发布步骤。未经用户明确要求不 push、不创建发布或覆盖已发布资产。
 
 Windows 更新诊断及旧卸载器边界见 [WINDOWS-UPDATES.md](WINDOWS-UPDATES.md)。NSIS 改动须用 Windows CI 的真实 installer 编译和隔离 harness 验证，macOS 上的编译结果不能替代 Windows 行为证据。

@@ -408,6 +408,7 @@ export const zh = {
 		about: {
 			version: "版本",
 			poweredBy: "基于 Pi Coding Agent 构建",
+			upstreamBase: "基于上游 {version}",
 			sourceCode: "源码与反馈",
 		},
 		models: {

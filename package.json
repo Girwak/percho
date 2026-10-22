@@ -1,13 +1,13 @@
 {
 	"name": "percho",
 	"private": true,
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "Desktop GUI for the Pi coding agent, built with Electron",
 	"license": "MIT",
 	"author": "Jaxton07",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Jaxton07/percho.git"
+		"url": "git+https://github.com/Girwak/percho.git"
 	},
 	"bugs": "https://github.com/Jaxton07/percho/issues",
 	"workspaces": [

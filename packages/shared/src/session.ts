@@ -401,6 +401,8 @@ export interface AppInfo {
 	name: string;
 	/** 应用版本 */
 	version: string;
+	/** 基于的上游版本 */
+	upstreamVersion: string;
 	electron: string;
 	chrome: string;
 	node: string;

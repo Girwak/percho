@@ -75,6 +75,11 @@ export function AboutPanel() {
 			<p className="mt-2 font-mono text-ui-12 text-ink-dim">
 				{t("settings.about.version")} {info?.version ?? "…"}
 			</p>
+			{info?.upstreamVersion && (
+				<p className="text-ui-11 text-ink-faint">
+					{t("settings.about.upstreamBase", { version: info.upstreamVersion })}
+				</p>
+			)}
 			<div className="mt-4 flex items-center gap-2">
 				<button
 					type="button"

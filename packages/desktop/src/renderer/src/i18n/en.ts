@@ -414,6 +414,7 @@ export const en: Messages = {
 		about: {
 			version: "Version",
 			poweredBy: "Built on Pi Coding Agent",
+			upstreamBase: "Based on upstream {version}",
 			sourceCode: "Source code & feedback",
 		},
 		models: {
