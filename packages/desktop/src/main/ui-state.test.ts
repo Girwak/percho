@@ -367,3 +367,37 @@ describe("字号档位（uiFontSize / codeFontSize）", () => {
 		expect(state?.codeFontSize).toBe(14);
 	});
 });
+
+describe("chatColumnWidthMode 白名单（聊天内容列宽模式）", () => {
+	it("旧文件缺字段 → default", async () => {
+		writeFileSync(file(), "{}");
+		expect((await loadUiState())?.chatColumnWidthMode).toBe("default");
+	});
+
+	it("合法档位原样保留（default / wide 互切都能读回）", async () => {
+		await saveUiState({ chatColumnWidthMode: "wide" });
+		expect((await loadUiState())?.chatColumnWidthMode).toBe("wide");
+		await saveUiState({ chatColumnWidthMode: "default" });
+		expect((await loadUiState())?.chatColumnWidthMode).toBe("default");
+	});
+
+	it("手改文件的脏值（未知字符串/数字/null/数组）→ default，不炸启动", async () => {
+		for (const raw of [
+			'{"chatColumnWidthMode":"full"}',
+			'{"chatColumnWidthMode":1}',
+			'{"chatColumnWidthMode":null}',
+			'{"chatColumnWidthMode":["wide"]}',
+		]) {
+			writeFileSync(file(), raw);
+			expect((await loadUiState())?.chatColumnWidthMode, raw).toBe("default");
+		}
+	});
+
+	it("保存补丁不冲掉其它字段、也不被其它补丁冲掉", async () => {
+		await saveUiState({ chatColumnWidthMode: "wide" });
+		await saveUiState({ pinnedSessions: ["s1"] });
+		const state = await loadUiState();
+		expect(state?.chatColumnWidthMode).toBe("wide");
+		expect(state?.pinnedSessions).toEqual(["s1"]);
+	});
+});

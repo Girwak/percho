@@ -16,6 +16,11 @@ export interface SessionWorkspaceSnapshot {
 /** 主题模式：system = 跟随系统 prefers-color-scheme */
 export type ThemeMode = "light" | "dark" | "system";
 
+/** 聊天内容列宽模式：default = 760px 排版宽；wide = 可视区 90%（封顶 `CHAT_COLUMN_WIDE_MAX_WIDTH`） */
+export type ChatColumnWidthMode = "default" | "wide";
+/** wide 模式的列宽上限（px）：超宽屏下 90% 拉满会让单行文字过长，封顶保可读性 */
+export const CHAT_COLUMN_WIDE_MAX_WIDTH = 1600;
+
 /** 自定义背景：image 为主进程 userData/backgrounds/ 下的文件名（renderer 经 pi-bg:// 协议加载）；dim 为遮罩不透明度 0–1（越大背景越淡） */
 export interface BackgroundSettings {
 	image: string | null;
@@ -80,6 +85,11 @@ export interface UiState {
 	 * 影响 monaco 代码块 / 内联 code / diff / mermaid 源码。
 	 */
 	codeFontSize: number;
+	/**
+	 * 聊天内容列宽模式（缺省 `default`）：`default` = 760px 排版宽，`wide` = 可视区 90% 封顶
+	 * `CHAT_COLUMN_WIDE_MAX_WIDTH`（`MessageList` 居中列消费；消息内 85%/百分比宽度全部相对列宽自动跟随）。
+	 */
+	chatColumnWidthMode: ChatColumnWidthMode;
 	/**
 	 * 左侧栏已展开的分组 key（日常 cwd + 各项目 cwd）= 用户手动开合过的记录。
 	 * 空数组的含义**只由 `expandedGroupsTouched` 决定**（空 = 全部折叠 / 未操作）。

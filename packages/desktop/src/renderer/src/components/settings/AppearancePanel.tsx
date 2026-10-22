@@ -1,4 +1,4 @@
-import { CODE_FONT_SIZE_PRESETS, formatFontSize, type ThemeMode, UI_FONT_SIZE_PRESETS } from "@percho/shared";
+import { type ChatColumnWidthMode, CODE_FONT_SIZE_PRESETS, formatFontSize, type ThemeMode, UI_FONT_SIZE_PRESETS } from "@percho/shared";
 import { useState } from "react";
 import { useT } from "../../i18n";
 import { backgroundImageUrl, useThemeStore } from "../../stores/theme";
@@ -58,6 +58,12 @@ const THEME_LABEL_KEYS = {
 	system: "settings.themeSystem",
 } as const;
 
+const CHAT_WIDTH_MODES: ChatColumnWidthMode[] = ["default", "wide"];
+const CHAT_WIDTH_LABEL_KEYS = {
+	default: "settings.chatWidthDefault",
+	wide: "settings.chatWidthWide",
+} as const satisfies Record<ChatColumnWidthMode, string>;
+
 type AppearanceTab = "basics" | "uiPlugins";
 
 const APPEARANCE_TABS = [
@@ -84,6 +90,8 @@ function AppearanceBasics() {
 	const setUiFontSize = useUiPreferencesStore((s) => s.setUiFontSize);
 	const codeFontSize = useUiPreferencesStore((s) => s.codeFontSize);
 	const setCodeFontSize = useUiPreferencesStore((s) => s.setCodeFontSize);
+	const chatColumnWidthMode = useUiPreferencesStore((s) => s.chatColumnWidthMode);
+	const setChatColumnWidthMode = useUiPreferencesStore((s) => s.setChatColumnWidthMode);
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -119,6 +127,27 @@ function AppearanceBasics() {
 					<span className="w-20 shrink-0 text-ui-12 text-ink-dim">{t("settings.fontSizeCode")}</span>
 					<FontSizeChips presets={CODE_FONT_SIZE_PRESETS} value={codeFontSize} onChange={setCodeFontSize} />
 					<span className="font-mono text-ui-115 text-ink-dim">{formatFontSize(codeFontSize)}</span>
+				</div>
+			</div>
+			<div>
+				<h3 className="text-ui-13 font-medium text-ink">{t("settings.chatWidth")}</h3>
+				<p className="mt-0.5 text-ui-11 leading-relaxed text-ink-faint">{t("settings.chatWidthHint")}</p>
+				<div className="mt-2 flex gap-2">
+					{CHAT_WIDTH_MODES.map((m) => (
+						<button
+							key={m}
+							type="button"
+							aria-pressed={chatColumnWidthMode === m}
+							className={`rounded-lg border px-3 py-1.5 text-ui-13 transition-colors ${
+								chatColumnWidthMode === m
+									? "border-ink bg-ink text-on-ink"
+									: "border-border text-ink-2 hover:border-border-strong hover:bg-hover"
+							}`}
+							onClick={() => setChatColumnWidthMode(m)}
+						>
+							{t(CHAT_WIDTH_LABEL_KEYS[m])}
+						</button>
+					))}
 				</div>
 			</div>
 			<div>

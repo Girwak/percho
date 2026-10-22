@@ -141,6 +141,11 @@ function normalize(parsed: UiStateFileShape): UiState {
 		// 字号档位：脏值/缺字段一律回落基准档（13 / 12.5 => 乘数 1，等于迁移前现状）
 		uiFontSize: clampUiFontSize(parsed.uiFontSize),
 		codeFontSize: clampCodeFontSize(parsed.codeFontSize),
+		// 聊天列宽模式：只认两个枚举值（手改文件/旧版本 → default）
+		chatColumnWidthMode:
+			parsed.chatColumnWidthMode === "default" || parsed.chatColumnWidthMode === "wide"
+				? parsed.chatColumnWidthMode
+				: "default",
 		windowBounds: windowBounds(parsed.windowBounds),
 		expandedGroups,
 		// 显式布尔优先（含显式 false 配空数组）；缺字段/脏值才按清洗后的记录是否非空推断

@@ -1,4 +1,5 @@
 import {
+	type ChatColumnWidthMode,
 	CODE_FONT_SIZE_BASE,
 	clampCodeFontSize,
 	clampSidebarWidth,
@@ -48,6 +49,8 @@ interface UiPreferencesStore {
 	uiFontSize: number;
 	/** 代码字号（px）：基准 12.5。影响代码块 / 内联 code / diff / mermaid 源码（界面文字不受影响） */
 	codeFontSize: number;
+	/** 聊天内容列宽模式：default = 760px 排版宽，wide = 可视区 90% 封顶 CHAT_COLUMN_WIDE_MAX_WIDTH */
+	chatColumnWidthMode: ChatColumnWidthMode;
 	/** 启动时从 ui-state.json 恢复（main.tsx 在 render 前 await，避免开关状态闪现） */
 	init: () => Promise<void>;
 	setCenterOrbEnabled: (enabled: boolean) => void;
@@ -85,6 +88,8 @@ interface UiPreferencesStore {
 	setUiFontSize: (px: number) => void;
 	/** 切换代码字号：写 `--fs-code-scale`（内联 code / 代码块 / diff / mermaid）+ monaco 由 Markdown.tsx 传 options */
 	setCodeFontSize: (px: number) => void;
+	/** 切换聊天内容列宽模式（同值短路 + 落盘） */
+	setChatColumnWidthMode: (mode: ChatColumnWidthMode) => void;
 }
 
 /** 持久化补丁（失败只记日志：偏好丢失不影响使用，弹 toast 反而更吵） */
@@ -110,6 +115,7 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 	lastCwd: null,
 	uiFontSize: UI_FONT_SIZE_BASE,
 	codeFontSize: CODE_FONT_SIZE_BASE,
+	chatColumnWidthMode: "default",
 
 	init: async () => {
 		const saved = await getPi()
@@ -117,6 +123,8 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 			.catch(() => null);
 		const uiFontSize = clampUiFontSize(saved?.uiFontSize);
 		const codeFontSize = clampCodeFontSize(saved?.codeFontSize);
+		const chatColumnWidthMode: ChatColumnWidthMode =
+			saved?.chatColumnWidthMode === "wide" ? "wide" : "default";
 		set({
 			centerOrbEnabled: saved?.centerOrbEnabled ?? false,
 			pinnedSessions: saved?.pinnedSessions ?? [],
@@ -131,6 +139,7 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 			lastCwd: saved?.lastCwd ?? null,
 			uiFontSize,
 			codeFontSize,
+			chatColumnWidthMode,
 		});
 		// **首帧前生效**：main.tsx 在 render 前 await init，所以这里写完变量才画第一帧，不会闪一下默认字号
 		applyFontScales(uiFontSize, codeFontSize);
@@ -171,6 +180,12 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 		set({ codeFontSize: next });
 		applyFontScales(get().uiFontSize, next);
 		persistPatch({ codeFontSize: next });
+	},
+
+	setChatColumnWidthMode: (mode) => {
+		if (get().chatColumnWidthMode === mode) return;
+		set({ chatColumnWidthMode: mode });
+		persistPatch({ chatColumnWidthMode: mode });
 	},
 
 	toggleSidebarCollapsed: () => {
