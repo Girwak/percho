@@ -1,3 +1,8 @@
+import type {
+	AskUserQuestionRequest,
+	AskUserQuestionResolved,
+	AskUserQuestionRespond,
+} from "./ask-user-question";
 import type { ChannelSubscriptionsSnapshot } from "./channel-subscriptions";
 import type {
 	ExtensionDialogRequest,
@@ -226,6 +231,15 @@ export const EXTENSION_DIALOG_CHANNELS = {
 	>(),
 } as const;
 
+/** 内置 ask_user_question 域：renderer 应答（请求/结算为 main→renderer 单向事件，在 index.ts 转发） */
+export const ASK_USER_CHANNELS = {
+	/** 应答内置问卷（宿主按 requestId 归属路由，未知 id 静默忽略） */
+	respondAskUserQuestion: ch("ask-user:respond")<
+		{ requestId: string; answer: AskUserQuestionRespond },
+		void
+	>(),
+} as const;
+
 /** 设置域：provider 设置 + 模型偏好 + 登录流程 + 权限/上下文/频道开关 + 信任应答 */
 export const SETTINGS_CHANNELS = {
 	/** 列出 provider（默认只走内置目录+本地缓存；forceNetwork 时联网拉最新模型目录，触发点 = 手动刷新 / 进入模型分类自动刷新） */
@@ -378,6 +392,7 @@ export const CHANNEL_TABLE = {
 	...APP_CHANNELS,
 	...LAN_CHANNELS,
 	...EXTENSION_DIALOG_CHANNELS,
+	...ASK_USER_CHANNELS,
 	...UI_PLUGINS_CHANNELS,
 } as const;
 
@@ -449,6 +464,8 @@ export const SUBSCRIPTION_TABLE = {
 		"ExtensionEditorText",
 		"pi:extension-editor-text",
 	),
+	onAskUserRequest: subscription<AskUserQuestionRequest>()("AskUserRequest", "pi:ask-user-request"),
+	onAskUserResolved: subscription<AskUserQuestionResolved>()("AskUserResolved", "pi:ask-user-resolved"),
 } as const;
 
 export type SubscriptionApi<T extends Record<string, { payload: unknown }>> = {

@@ -39,6 +39,7 @@
 | 内置工具、子代理、todo、频道协作 | backend `tools/`；子代理只读检视与返回关系在 renderer `stores/subagent-return.ts` |
 | 上下文蒸发、压缩护栏 | backend `tools/context-evaporation/`、`tools/compaction-guard/` |
 | 扩展选择题、输入、确认、通知 | backend `session/ui-context.ts`、`extension-dialog-host.ts`；renderer `components/session/InteractionDock.tsx` |
+| 内置 ask_user_question 问卷（同名第三方插件自动被遮蔽） | backend `tools/ask-user-question.ts`；renderer `components/session/AskUserDock.tsx`；仲裁见 `DockSlot.tsx` |
 | 设置页及按域加载 | renderer `components/settings/`、`stores/settings.ts`；新增分类入口 `SettingsDialog.tsx` |
 | UI 插件运行时与发布契约 | renderer `plugins/`；desktop `main/ui-plugins/`、`resources/ui-plugins/SPEC.md` |
 | 主题、字号、基础样式、文案 | renderer `styles/`、`stores/theme.ts`、`lib/typography.ts`、`i18n/`；字号档位在 shared `typography.ts` |

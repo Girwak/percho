@@ -3,6 +3,7 @@ import type { SessionMeta } from "@percho/shared";
 import { createLogger } from "../log";
 import type { PermissionModeRef } from "../permissions/extension";
 import type { PermissionGate } from "../permissions/gate";
+import type { AskUserQuestionHost } from "../tools/ask-user-question";
 import type { ExtensionDialogHost } from "./extension-dialog-host";
 import { deriveSessionTimes, fallbackSessionTimes } from "./meta";
 import { emitSessionShutdown } from "./shutdown";
@@ -17,6 +18,8 @@ export interface RegisteredSession {
 	gate: PermissionGate;
 	/** 扩展对话框宿主（每会话一个；GUI 停靠槽数据源，GUI-only 不进 LAN） */
 	dialogs: ExtensionDialogHost;
+	/** 内置 ask_user_question 问卷宿主（每会话一个；与 dialogs 平行的专用卡片） */
+	askUser: AskUserQuestionHost;
 	/** 会话权限模式引用（default 缺省；随工厂闭包注入求值链，不落盘） */
 	modeRef: PermissionModeRef;
 }
@@ -31,7 +34,7 @@ export interface SessionDisposeHooks {
 
 /** Instance-only ownership: no id lookup, SDK dispose, channel registry or trace dependency. */
 export function releaseEntryResources(
-	entry: Pick<RegisteredSession, "unsubscribe" | "gate" | "dialogs">,
+	entry: Pick<RegisteredSession, "unsubscribe" | "gate" | "dialogs" | "askUser">,
 ): void {
 	const failures: unknown[] = [];
 	try {
@@ -46,6 +49,11 @@ export function releaseEntryResources(
 	}
 	try {
 		entry.dialogs.dispose();
+	} catch (error) {
+		failures.push(error);
+	}
+	try {
+		entry.askUser.dispose();
 	} catch (error) {
 		failures.push(error);
 	}

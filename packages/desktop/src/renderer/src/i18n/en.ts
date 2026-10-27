@@ -179,6 +179,13 @@ export const en: Messages = {
 		timedOutNote: 'Times out to "cancel" if unanswered',
 		prefillNote: 'Extension "{source}" filled the draft',
 	},
+	askUser: {
+		title: "Questions",
+		customPlaceholder: "Type your own answer…",
+		hint: "Click options · Enter next · Esc cancel",
+		next: "Next",
+		back: "Back",
+	},
 	permission: {
 		deny: "Deny",
 		allowAlways: "Always allow (this project)",

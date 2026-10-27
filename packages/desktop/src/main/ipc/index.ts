@@ -4,6 +4,7 @@ import type { LanObserverHandle } from "../lan";
 import type { UiPluginManager } from "../ui-plugins/manager";
 import { onUpdateState } from "../updater";
 import { registerAppIpc } from "./app";
+import { registerAskUserIpc } from "./ask-user";
 import { registerExtensionDialogIpc } from "./extension-dialogs";
 import { registerLanIpc } from "./lan";
 import { registerPackagesIpc } from "./packages";
@@ -26,6 +27,7 @@ export function registerIpc(
 	registerPackagesIpc(backend);
 	registerAppIpc(backend);
 	registerExtensionDialogIpc(backend);
+	registerAskUserIpc(backend);
 	registerUiPluginsIpc(uiPluginsManager);
 	registerLanIpc(lan);
 	// 热重载 watcher：插件源码变更 → 重建 → 推 changed 事件（renderer 经 loader reloadPlugin 热替换）
@@ -44,6 +46,9 @@ export function registerIpc(
 	// 扩展对话框四事件：请求/结算/notify/草稿预填（issue #45）
 	forward(backend.onExtensionDialogRequest.bind(backend), IpcChannels.ExtensionDialogRequest);
 	forward(backend.onExtensionDialogResolved.bind(backend), IpcChannels.ExtensionDialogResolved);
+	// 内置问卷两事件：请求/结算（与扩展对话框平行的专用卡）
+	forward(backend.onAskUserRequest.bind(backend), IpcChannels.AskUserRequest);
+	forward(backend.onAskUserResolved.bind(backend), IpcChannels.AskUserResolved);
 	forward(backend.onExtensionNotify.bind(backend), IpcChannels.ExtensionNotify);
 	forward(backend.onExtensionEditorText.bind(backend), IpcChannels.ExtensionEditorText);
 	forward(backend.onLoginEvent.bind(backend), IpcChannels.SettingsLoginEvent);

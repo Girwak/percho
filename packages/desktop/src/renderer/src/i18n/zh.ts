@@ -184,6 +184,13 @@ export const zh = {
 		timedOutNote: "超时未应答将按「取消」处理",
 		prefillNote: "扩展「{source}」填入了一段草稿",
 	},
+	askUser: {
+		title: "提问",
+		customPlaceholder: "或输入自定义答案…",
+		hint: "点击选项 · Enter 下一步 · Esc 取消",
+		next: "下一题",
+		back: "上一题",
+	},
 	trust: {
 		title: "信任此项目文件夹？",
 		message:

@@ -23,6 +23,9 @@ import {
 import type {
 	ArchiveConfigInfo,
 	ArchivedSessionMeta,
+	AskUserQuestionRequest,
+	AskUserQuestionResolved,
+	AskUserQuestionRespond,
 	AvailableModel,
 	ChannelSubscriptionsSnapshot,
 	ContextManagerMode,
@@ -141,6 +144,7 @@ import {
 	writeContextManagerMode,
 } from "./tools/context-evaporation";
 import { collectMcpTools, makeMcpInventoryExtension } from "./tools/mcp-inventory";
+import { ASK_USER_TOOL_NAME, AskUserQuestionHost, makeAskUserQuestionTool } from "./tools/ask-user-question";
 import { makeShowImageTool } from "./tools/show-image";
 import { discoverAgents, isSubagentSessionPath, makeSubagentTool } from "./tools/subagent";
 import { applySubagentMutex, resolveSubagentPreferBuiltin } from "./tools/subagent/mutex";
@@ -241,6 +245,8 @@ export class PiBackend {
 	private readonly loginEmitter = new Emitter<LoginEventPayload>();
 	private readonly extensionDialogRequestEmitter = new Emitter<ExtensionDialogRequest>();
 	private readonly extensionDialogResolvedEmitter = new Emitter<ExtensionDialogResolved>();
+	private readonly askUserRequestEmitter = new Emitter<AskUserQuestionRequest>();
+	private readonly askUserResolvedEmitter = new Emitter<AskUserQuestionResolved>();
 	private readonly extensionNotifyEmitter = new Emitter<ExtensionNotifyEvent>();
 	private readonly extensionEditorTextEmitter = new Emitter<ExtensionEditorTextEvent>();
 	/** MCP 运行态变化（spec §4.8.1：面板刷新用） */
@@ -303,8 +309,8 @@ export class PiBackend {
 		});
 	}
 
-	/** 自定义工具 = 调用方传入的 + 内置 webfetch（webFetch:false 关闭）+ show_image + todo + subagent */
-	private buildCustomTools(gate: PermissionGate, preferBuiltin: boolean): ToolDefinition[] {
+	/** 自定义工具 = 调用方传入的 + 内置 webfetch（webFetch:false 关闭）+ show_image + todo + ask_user_question + subagent */
+	private buildCustomTools(gate: PermissionGate, preferBuiltin: boolean, askUser: AskUserQuestionHost): ToolDefinition[] {
 		const tools = [...(this.options.customTools ?? [])];
 		const webFetch = this.options.webFetch;
 		if (webFetch !== false) {
@@ -312,6 +318,7 @@ export class PiBackend {
 		}
 		tools.push(makeShowImageTool());
 		tools.push(makeTodoTool());
+		tools.push(makeAskUserQuestionTool({ host: askUser }));
 		if (preferBuiltin) {
 			tools.push(
 				makeSubagentTool({
@@ -548,7 +555,7 @@ export class PiBackend {
 				model,
 				thinkingLevel: options.thinkingLevel as ThinkingLevel | undefined,
 				tools: this.options.tools,
-				customTools: this.buildCustomTools(deps.gate, deps.preferBuiltin),
+				customTools: this.buildCustomTools(deps.gate, deps.preferBuiltin, deps.askUser),
 				sessionManager: SessionManager.create(cwd),
 				settingsManager,
 				resourceLoader,
@@ -593,7 +600,7 @@ export class PiBackend {
 				tools: this.options.tools,
 				settingsManager,
 				resourceLoader,
-				customTools: this.buildCustomTools(deps.gate, deps.preferBuiltin),
+				customTools: this.buildCustomTools(deps.gate, deps.preferBuiltin, deps.askUser),
 			});
 		});
 		log.info("session opened", session.sessionId, { file: filePath });
@@ -615,6 +622,8 @@ export class PiBackend {
 			preferBuiltin: boolean;
 			/** 两阶段资源加载（信任决策走 projectLoader 既有链路）；懒执行：makeSession 决定时机 */
 			load: () => Promise<{ settingsManager: SettingsManagerType; resourceLoader: DefaultResourceLoader }>;
+			/** 内置问卷宿主（每会话一个，wireSession 创建并绑定；工具闭包经 buildCustomTools 捕获） */
+			askUser: AskUserQuestionHost;
 		}) => Promise<CreateAgentSessionResult>,
 	): Promise<AgentSession> {
 		const gate = new PermissionGate((req) => this.permissionEmitter.emit(req));
@@ -628,7 +637,19 @@ export class PiBackend {
 			return loaded;
 		};
 		const preferBuiltin = await this.subagentPreferBuiltin();
-		const { session, extensionsResult } = await makeSession({ gate, preferBuiltin, load });
+		const askUser = new AskUserQuestionHost({
+			onRequest: (req) => this.askUserRequestEmitter.emit(req),
+			onResolved: (result) => this.askUserResolvedEmitter.emit(result),
+		});
+		const { session, extensionsResult } = await makeSession({ gate, preferBuiltin, load, askUser });
+		askUser.bind(session.sessionId);
+		// 同名内置工具由 customTools 后写自动覆盖；这里只对账记录哪些第三方扩展被接管
+		const shadowedAsk = extensionsResult.extensions.filter((ext) => ext.tools.has(ASK_USER_TOOL_NAME));
+		if (shadowedAsk.length > 0) {
+			log.info("third-party ask_user_question shadowed by builtin", session.sessionId, {
+				paths: shadowedAsk.map((ext) => ext.path),
+			});
+		}
 		const mutex = applySubagentMutex(session, extensionsResult, preferBuiltin);
 		if (mutex.shadowed.length > 0) {
 			log.info("third-party subagent tools shadowed", session.sessionId, mutex);
@@ -654,6 +675,7 @@ export class PiBackend {
 				cwd,
 				gate,
 				dialogs,
+				askUser,
 				modeRef,
 				readOnly: readOnly || undefined,
 			});
@@ -669,7 +691,7 @@ export class PiBackend {
 			}
 			// Release only the new instance: no holder-id cleanup or shutdown emission.
 			try {
-				releaseEntryResources({ unsubscribe, gate, dialogs });
+				releaseEntryResources({ unsubscribe, gate, dialogs, askUser });
 			} catch (cleanupError) {
 				log.warn("conflicting entry cleanup failed", session.sessionId, cleanupError);
 			}
@@ -1637,6 +1659,22 @@ export class PiBackend {
 		return this.extensionEditorTextEmitter.subscribe(handler);
 	}
 
+	/** 内置问卷请求/结算订阅（main 进程转发 renderer 用） */
+	onAskUserRequest(handler: (req: AskUserQuestionRequest) => void): () => void {
+		return this.askUserRequestEmitter.subscribe(handler);
+	}
+
+	onAskUserResolved(handler: (result: AskUserQuestionResolved) => void): () => void {
+		return this.askUserResolvedEmitter.subscribe(handler);
+	}
+
+	/** renderer 应答内置问卷（requestId 含 sessionId 全局唯一；非本宿主实例静默忽略，仿 respondExtensionDialog 遍历） */
+	respondAskUserQuestion(requestId: string, answer: AskUserQuestionRespond): void {
+		for (const { askUser } of this.registry.list()) {
+			askUser.respond(requestId, answer);
+		}
+	}
+
 	/** renderer 应答扩展对话框（requestId 含 sessionId 全局唯一；非本宿主实例静默忽略，仿 respondPermission 遍历） */
 	respondExtensionDialog(requestId: string, answer: ExtensionDialogRespond): void {
 		for (const { dialogs } of this.registry.list()) {
@@ -1769,6 +1807,8 @@ export class PiBackend {
 		this.loginEmitter.clear();
 		this.extensionDialogRequestEmitter.clear();
 		this.extensionDialogResolvedEmitter.clear();
+		this.askUserRequestEmitter.clear();
+		this.askUserResolvedEmitter.clear();
 		this.extensionNotifyEmitter.clear();
 		this.extensionEditorTextEmitter.clear();
 		this.trustGate.dispose();

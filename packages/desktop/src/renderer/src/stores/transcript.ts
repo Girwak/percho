@@ -1,4 +1,5 @@
 import type {
+	AskUserQuestionRequest,
 	ExtensionDialogRequest,
 	ImageInput,
 	SessionEvent,
@@ -29,11 +30,18 @@ export interface SessionEntry extends SessionTranscriptState {
 	pendingPermissions: PermissionRequest[];
 	/** 扩展对话框待应答队列（InteractionDock 渲染队首；D6 仲裁时权限优先于对话框） */
 	pendingDialogs: ExtensionDialogRequest[];
+	/** 内置 ask_user_question 待应答队列（AskUserDock 渲染队首；仲裁在 dialogs 之后） */
+	pendingAskUser: AskUserQuestionRequest[];
 	/** setEditorText 预填来源（一次性提示，用户首次键入清除）；undefined = 无提示 */
 	extensionPrefillSource?: string;
 }
 
-const EMPTY_ENTRY: SessionEntry = { ...emptyTranscript(), pendingPermissions: [], pendingDialogs: [] };
+const EMPTY_ENTRY: SessionEntry = {
+	...emptyTranscript(),
+	pendingPermissions: [],
+	pendingDialogs: [],
+	pendingAskUser: [],
+};
 
 /** 空 todo 列表稳定引用（面板 selector 缺省用，禁内联新数组） */
 export const EMPTY_TODOS: TodoItem[] = [];
@@ -55,6 +63,9 @@ interface TranscriptStore {
 	/** 扩展对话框入队/结算（结算幂等 filter，IPC 应答与 resolved 事件双路径都安全） */
 	addExtensionDialog: (sessionId: string, req: ExtensionDialogRequest) => void;
 	resolveExtensionDialog: (sessionId: string, requestId: string) => void;
+	/** 内置问卷入队/结算（同 dialogs 双路径幂等语义） */
+	addAskUser: (sessionId: string, req: AskUserQuestionRequest) => void;
+	resolveAskUser: (sessionId: string, requestId: string) => void;
 	/** 扩展草稿预填来源提示（setEditorText 写入；用户首次键入清除） */
 	markExtensionPrefill: (sessionId: string, source: string) => void;
 	clearExtensionPrefill: (sessionId: string) => void;
@@ -86,6 +97,7 @@ export const useTranscriptStore = create<TranscriptStore>((set) => ({
 						unseenCompletion,
 						pendingPermissions: current?.pendingPermissions ?? [],
 						pendingDialogs: current?.pendingDialogs ?? [],
+						pendingAskUser: current?.pendingAskUser ?? [],
 						extensionPrefillSource: current?.extensionPrefillSource,
 					},
 				},
@@ -165,6 +177,7 @@ export const useTranscriptStore = create<TranscriptStore>((set) => ({
 					[sessionId]: {
 						...(current ?? { ...EMPTY_ENTRY }),
 						pendingDialogs: [...(current?.pendingDialogs ?? []), req],
+						pendingAskUser: current?.pendingAskUser ?? [],
 					},
 				},
 			};
@@ -180,6 +193,35 @@ export const useTranscriptStore = create<TranscriptStore>((set) => ({
 				bySession: {
 					...state.bySession,
 					[sessionId]: { ...current, pendingDialogs },
+				},
+			};
+		});
+	},
+	addAskUser: (sessionId, req) => {
+		set((state) => {
+			const current = state.bySession[sessionId];
+			return {
+				bySession: {
+					...state.bySession,
+					[sessionId]: {
+						...(current ?? { ...EMPTY_ENTRY }),
+						pendingDialogs: current?.pendingDialogs ?? [],
+						pendingAskUser: [...(current?.pendingAskUser ?? []), req],
+					},
+				},
+			};
+		});
+	},
+	resolveAskUser: (sessionId, requestId) => {
+		set((state) => {
+			const current = state.bySession[sessionId];
+			if (!current) return state;
+			const pendingAskUser = current.pendingAskUser.filter((r) => r.id !== requestId);
+			if (pendingAskUser.length === current.pendingAskUser.length) return state;
+			return {
+				bySession: {
+					...state.bySession,
+					[sessionId]: { ...current, pendingAskUser },
 				},
 			};
 		});
@@ -253,6 +295,7 @@ export const useTranscriptStore = create<TranscriptStore>((set) => ({
 						retrying: null,
 						pendingPermissions: current?.pendingPermissions ?? [],
 						pendingDialogs: current?.pendingDialogs ?? [],
+						pendingAskUser: current?.pendingAskUser ?? [],
 						extensionPrefillSource: current?.extensionPrefillSource,
 					},
 				},

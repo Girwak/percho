@@ -1,11 +1,12 @@
 import { useTranscriptStore } from "../../stores/transcript";
 import { Composer } from "../composer/Composer";
 import { ApprovalDock } from "./ApprovalDock";
+import { AskUserDock } from "./AskUserDock";
 import { InteractionDock } from "./InteractionDock";
 
 /**
- * 底部交换槽仲裁（D6）：权限审批 > 扩展对话框 > Composer。
- * 三者同位互换——agent 阻塞等答时发消息无意义；两种卡各自内部处理排队与退出动画，
+ * 底部交换槽仲裁（D6）：权限审批 > 扩展对话框 > 内置问卷 > Composer。
+ * 三者同位互换——agent 阻塞等答时发消息无意义；各卡内部处理排队与退出动画，
  * 未上场的卡停在 store 队列里，前者应答后自动顶上。
  */
 export function DockSlot({ sessionId, hideComposer }: { sessionId: string | null; hideComposer: boolean }) {
@@ -16,8 +17,12 @@ export function DockSlot({ sessionId, hideComposer }: { sessionId: string | null
 	const dialog = useTranscriptStore((s) =>
 		sessionId ? s.bySession[sessionId]?.pendingDialogs[0] : undefined,
 	);
+	const askUser = useTranscriptStore((s) =>
+		sessionId ? s.bySession[sessionId]?.pendingAskUser[0] : undefined,
+	);
 	if (permission) return <ApprovalDock sessionId={sessionId} />;
 	if (dialog) return <InteractionDock sessionId={sessionId} />;
+	if (askUser) return <AskUserDock sessionId={sessionId} />;
 	if (hideComposer) return null;
 	// relative z-20：× 删除键 -top-1.5 伸出容器顶 → 落入消息区，须盖过 MessageList 的 z-10
 	return (

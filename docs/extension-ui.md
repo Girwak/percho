@@ -21,6 +21,10 @@
 
 子代理或没有注入对应回调的上下文不具备同样的交互能力；`makeUiContext()` 的缺省行为是诚实取消/无操作，不默认选第一项，不伪造用户输入。
 
+## 内置 ask_user_question 与第三方插件的关系
+
+backend 内置同名 `ask_user_question` 工具（`tools/ask-user-question.ts`）：customTools 后写覆盖同名扩展工具（与内置 subagent 同语义），装了 rpiv-ask-user-question 等第三方插件的用户会话会记录 shadow 日志，工具调用落到内置实现。内置版走专用契约（`AskUserQuestionHost` + renderer `AskUserDock`），最多 9 道逐题呈现、复选多选、每题自定义答案，不受 `ui.select` 单选字符串选项的限制；纯 GUI 交互不进 LAN。
+
 ## 链路与所有权
 
 - backend `session/ui-context.ts`：唯一的 SDK UI 适配对象，新增 SDK 成员在此处理。

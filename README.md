@@ -66,6 +66,7 @@ And for those who prefer a GUI over a TUI:
 - Visual permission gates — approve or deny each tool call from a dock, backed by a per-tool rule engine
 - A collapsible project/session sidebar, draggable pinned-session pills, per-session composer drafts, and a follow-up queue with undo
 - Built-in subagents — a scout plus your own agent definitions, parallel task fan-outs, and run cards you can click to inspect the sub-session read-only
+- Built-in ask-user questionnaire — when requirements are ambiguous, the agent can surface up to 9 structured questions (multi-select, custom answers) one at a time as native GUI prompts; a third-party `ask_user_question` extension is shadowed automatically
 - Context evaporation (on by default) — stale tool outputs age into compact stubs, keeping long sessions within budget
 - Unified error system — in-chat error cards with one-click retry, an auto-retry status line, and full-page renderer crash recovery
 - Solid session workspace — fork from assistant turns or selected context, recall your own message back into the composer, todo panel, per-turn diff sidebar, slash-command menu and @-file completion

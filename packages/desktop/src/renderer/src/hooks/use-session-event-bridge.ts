@@ -55,6 +55,13 @@ export function useSessionEventBridge({
 		const offDialogResolved = pi.onExtensionDialogResolved((result) => {
 			useTranscriptStore.getState().resolveExtensionDialog(result.sessionId, result.requestId);
 		});
+		// 内置 ask_user_question：入队/撤卡（与扩展对话框平行的专用卡）
+		const offAskUserRequest = pi.onAskUserRequest((req) => {
+			useTranscriptStore.getState().addAskUser(req.sessionId, req);
+		});
+		const offAskUserResolved = pi.onAskUserResolved((result) => {
+			useTranscriptStore.getState().resolveAskUser(result.sessionId, result.requestId);
+		});
 		const offNotify = pi.onExtensionNotify((event) => {
 			pushExtensionToast(event.level, event.message, event.extensionPath || undefined);
 		});
@@ -70,6 +77,8 @@ export function useSessionEventBridge({
 			offPermissionResolved();
 			offDialogRequest();
 			offDialogResolved();
+			offAskUserRequest();
+			offAskUserResolved();
 			offNotify();
 			offEditorText();
 			offTrust();
