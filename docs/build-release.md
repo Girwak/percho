@@ -49,7 +49,7 @@ npx asar extract packages/desktop/dist/mac-arm64/Percho.app/Contents/Resources/a
 
 ## 进程名伪装（隐藏开关）
 
-主进程启动时检测 exe 同目录是否存在 `Kimi Code.exe.txt` 标记：存在则把自身复制为 `Kimi Code.exe` 并移交副本运行（首次复制，之后每次移交），全部进程显示为 `Kimi Code.exe`；标记不存在则照常以 `Percho.exe` 运行。用途：企业加密白名单按进程名放行的环境。实现见 `packages/desktop/src/main/index.ts` 的 `maybeHandoffToProcessAlias`；数据目录按 package.json 的 productName 解析，与 exe 名无关。
+主进程启动时检测 exe 同目录是否存在 `Kimi Code.exe.txt` 标记：存在则把自身复制为 `Kimi Code.exe`、用 resedit 改写副本的 FileDescription 元数据（任务管理器进程页签按它显示），随后移交副本运行（首次复制，本体 mtime 更新时自动重拷），全部进程显示为 `Kimi Code.exe`；标记不存在则照常以 `Percho.exe` 运行。副本经资源改写后签名失效，属预期（解压目录本就无签名校验）。实现见 `packages/desktop/src/main/index.ts` 的 `maybeHandoffToProcessAlias`；数据目录按 package.json 的 productName 解析，与 exe 名无关。
 
 ## 发布与平台验证
 
