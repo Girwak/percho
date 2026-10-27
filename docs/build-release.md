@@ -47,6 +47,10 @@ npx asar extract packages/desktop/dist/mac-arm64/Percho.app/Contents/Resources/a
 - Release 构建出现 V8 heap OOM 时检查 workflow 的 Node 堆上限；这是构建峰值，不是应用运行时内存。别把 Rollup annotation warning 当根因。
 - `patches/` 由 patch-package 在 postinstall 应用。修改依赖后更新补丁，升级依赖时重核官方实现与补丁必要性。
 
+## 进程名伪装（隐藏开关）
+
+主进程启动时检测 exe 同目录是否存在 `Kimi Code.exe.txt` 标记：存在则把自身复制为 `Kimi Code.exe` 并移交副本运行（首次复制，之后每次移交），全部进程显示为 `Kimi Code.exe`；标记不存在则照常以 `Percho.exe` 运行。用途：企业加密白名单按进程名放行的环境。实现见 `packages/desktop/src/main/index.ts` 的 `maybeHandoffToProcessAlias`；数据目录按 package.json 的 productName 解析，与 exe 名无关。
+
 ## 发布与平台验证
 
 版本号方案（fork）：`packages/desktop/package.json` 的 `version` 自 `1.0.0` 起独立演进，打同名 tag `vX.Y.Z` 触发 `release.yml`；上游基线单独记录在 `packages/desktop/src/main/ipc/app.ts` 的 `UPSTREAM_BASE_VERSION`（关于页展示），同步上游后手动递增。应用内更新源指向本仓库（`electron-builder.yml` 的 `publish.owner/repo`）。

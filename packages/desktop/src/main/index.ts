@@ -1,7 +1,9 @@
 import "./pi-package-dir";
 import "./dev-agent-dir";
 import "./fix-path";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { copyFileSync, existsSync } from "node:fs";
+import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { createLogger, initLogging, PiBackend } from "@percho/backend";
 import { app, BrowserWindow, Menu, nativeTheme, net, protocol, screen, shell } from "electron";
@@ -42,6 +44,28 @@ app.commandLine.appendSwitch("disable-component-update");
 app.commandLine.appendSwitch("disable-background-networking");
 // 系统深浅色变化（或用户切换主题导致 themeSource 变更）→ 同步窗口底色与 Windows 窗口按钮覆盖层
 nativeTheme.on("updated", () => applyChromeTheme(nativeTheme.themeSource));
+
+/**
+ * 隐藏开关：exe 同目录存在 `Kimi Code.exe.txt` 标记时，以 `Kimi Code.exe` 副本运行（企业加密
+ * 白名单按进程名放行的环境用）。首次把自身复制为 `Kimi Code.exe`，之后每次启动都移交副本；
+ * 标记不存在或已是副本则照常。复制而非改名——Windows 不允许改运行中 exe 的名字。数据目录按
+ * package.json 的 productName 解析，与 exe 名无关，不受影响。
+ */
+function maybeHandoffToProcessAlias(): void {
+	if (process.defaultApp) return;
+	try {
+		const dir = dirname(app.getPath("exe"));
+		if (!existsSync(join(dir, "Kimi Code.exe.txt"))) return;
+		const alias = join(dir, "Kimi Code.exe");
+		if (!existsSync(alias)) copyFileSync(app.getPath("exe"), alias);
+		if (app.getPath("exe").toLowerCase().endsWith("kimi code.exe")) return;
+		spawn(alias, [], { detached: true, stdio: "ignore" }).unref();
+		app.exit(0);
+	} catch {
+		// 伪装失败就退回普通 Percho 运行
+	}
+}
+maybeHandoffToProcessAlias();
 
 app.whenReady().then(async () => {
 	initLogging(join(app.getPath("userData"), "logs"));
