@@ -18,8 +18,18 @@ import { applyFontScales } from "../lib/typography";
 interface UiPreferencesStore {
 	/** 中央状态动画：任务运行时对话区中央显示放大 orb（z-20 文字层之上 + canvas 一体遮罩压文字）；与 Working/Thinking 行前小 orb 解耦，小 orb 恒显示 */
 	centerOrbEnabled: boolean;
-	/** 性能模式：关闭全部非必要视觉动效（见 lib/motion.ts 与 globals.css 的 html.perf 规则）；默认关 */
-	performanceMode: boolean;
+	/** 流式跑马灯尾随（流式预览右对齐追随最新 token）；默认开 */
+	streamingMarquee: boolean;
+	/** 会话页推/拉切换过渡（View Transitions）；默认开 */
+	pageSlide: boolean;
+	/** 思考状态动画（中央大动画 rAF 循环 + 状态行小 orb；关后仍显示静态状态色）；默认开 */
+	orbAnimation: boolean;
+	/** 界面过渡动效总闸（CSS transition/animation，html.nofx 规则）；默认开 */
+	uiTransitions: boolean;
+	/** 自定义背景图渲染（设置里选的图保留，只是不渲染）；默认开 */
+	backgroundImage: boolean;
+	/** 暗色主题弹窗发光（shadow-dialog 白色发光投影）；默认开 */
+	dialogGlow: boolean;
 	/** 置顶会话（id，新置顶在前）：**v8 起就是顶栏胶囊的内容**（左栏只靠图钉标记，不改顺序） */
 	pinnedSessions: string[];
 	/** 按会话记住的权限模式（只存非 default；见 spec/permission-mode.md D7） */
@@ -56,7 +66,12 @@ interface UiPreferencesStore {
 	/** 启动时从 ui-state.json 恢复（main.tsx 在 render 前 await，避免开关状态闪现） */
 	init: () => Promise<void>;
 	setCenterOrbEnabled: (enabled: boolean) => void;
-	setPerformanceMode: (enabled: boolean) => void;
+	setStreamingMarquee: (enabled: boolean) => void;
+	setPageSlide: (enabled: boolean) => void;
+	setOrbAnimation: (enabled: boolean) => void;
+	setUiTransitions: (enabled: boolean) => void;
+	setBackgroundImage: (enabled: boolean) => void;
+	setDialogGlow: (enabled: boolean) => void;
 	/** 置顶 / 取消置顶（新置顶排最左） */
 	togglePin: (sessionId: string) => void;
 	setBarSessionsVisible: (visible: boolean) => void;
@@ -104,7 +119,12 @@ function persistPatch(patch: Partial<UiState>): void {
 
 export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 	centerOrbEnabled: false,
-	performanceMode: false,
+	streamingMarquee: true,
+	pageSlide: true,
+	orbAnimation: true,
+	uiTransitions: true,
+	backgroundImage: true,
+	dialogGlow: true,
 	pinnedSessions: [],
 	sessionPermissionModes: {},
 	barSessionsVisible: true,
@@ -131,7 +151,12 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 			saved?.chatColumnWidthMode === "wide" ? "wide" : "default";
 		set({
 			centerOrbEnabled: saved?.centerOrbEnabled ?? false,
-			performanceMode: saved?.performanceMode ?? false,
+			streamingMarquee: saved?.streamingMarquee ?? true,
+			pageSlide: saved?.pageSlide ?? true,
+			orbAnimation: saved?.orbAnimation ?? true,
+			uiTransitions: saved?.uiTransitions ?? true,
+			backgroundImage: saved?.backgroundImage ?? true,
+			dialogGlow: saved?.dialogGlow ?? true,
 			pinnedSessions: saved?.pinnedSessions ?? [],
 			sessionPermissionModes: saved?.sessionPermissionModes ?? {},
 			barSessionsVisible: saved?.barSessionsVisible ?? true,
@@ -155,9 +180,34 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 		persistPatch({ centerOrbEnabled: enabled });
 	},
 
-	setPerformanceMode: (enabled) => {
-		set({ performanceMode: enabled });
-		persistPatch({ performanceMode: enabled });
+	setStreamingMarquee: (enabled) => {
+		set({ streamingMarquee: enabled });
+		persistPatch({ streamingMarquee: enabled });
+	},
+
+	setPageSlide: (enabled) => {
+		set({ pageSlide: enabled });
+		persistPatch({ pageSlide: enabled });
+	},
+
+	setOrbAnimation: (enabled) => {
+		set({ orbAnimation: enabled });
+		persistPatch({ orbAnimation: enabled });
+	},
+
+	setUiTransitions: (enabled) => {
+		set({ uiTransitions: enabled });
+		persistPatch({ uiTransitions: enabled });
+	},
+
+	setBackgroundImage: (enabled) => {
+		set({ backgroundImage: enabled });
+		persistPatch({ backgroundImage: enabled });
+	},
+
+	setDialogGlow: (enabled) => {
+		set({ dialogGlow: enabled });
+		persistPatch({ dialogGlow: enabled });
 	},
 
 	setBarSessionsVisible: (visible) => {

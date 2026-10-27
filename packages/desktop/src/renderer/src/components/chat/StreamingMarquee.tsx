@@ -1,6 +1,7 @@
 import { tailOffsetForWidths } from "@percho/shared";
 import { useLayoutEffect, useRef, useState } from "react";
-import { useMotionReduced } from "../../lib/motion";
+import { useSystemReducedMotion } from "../../lib/motion";
+import { useUiPreferencesStore } from "../../stores/ui-preferences";
 
 /**
  * 流式预览的 tail-follow：文本每次增长后立即右对齐，保持最新 token 在视口末端。
@@ -11,7 +12,8 @@ export function StreamingMarquee({ text }: { text: string }) {
 	const trackRef = useRef<HTMLDivElement>(null);
 	const measureRef = useRef<() => void>(() => {});
 	const [metrics, setMetrics] = useState({ viewportWidth: 0, textWidth: 0 });
-	const reducedMotion = useMotionReduced();
+	const marqueeEnabled = useUiPreferencesStore((s) => s.streamingMarquee);
+	const reducedMotion = !marqueeEnabled || useSystemReducedMotion();
 	const overflowing = metrics.textWidth > metrics.viewportWidth;
 	const offset = reducedMotion ? 0 : tailOffsetForWidths(metrics.textWidth, metrics.viewportWidth);
 

@@ -82,8 +82,18 @@ function AppearanceBasics() {
 	const sessionRailEnabled = useUiPreferencesStore((s) => s.sessionRailEnabled);
 	const setSessionRailEnabled = useUiPreferencesStore((s) => s.setSessionRailEnabled);
 	const centerOrbEnabled = useUiPreferencesStore((s) => s.centerOrbEnabled);
-	const performanceMode = useUiPreferencesStore((s) => s.performanceMode);
-	const setPerformanceMode = useUiPreferencesStore((s) => s.setPerformanceMode);
+	const streamingMarquee = useUiPreferencesStore((s) => s.streamingMarquee);
+	const setStreamingMarquee = useUiPreferencesStore((s) => s.setStreamingMarquee);
+	const pageSlide = useUiPreferencesStore((s) => s.pageSlide);
+	const setPageSlide = useUiPreferencesStore((s) => s.setPageSlide);
+	const orbAnimation = useUiPreferencesStore((s) => s.orbAnimation);
+	const setOrbAnimation = useUiPreferencesStore((s) => s.setOrbAnimation);
+	const uiTransitions = useUiPreferencesStore((s) => s.uiTransitions);
+	const setUiTransitions = useUiPreferencesStore((s) => s.setUiTransitions);
+	const backgroundImage = useUiPreferencesStore((s) => s.backgroundImage);
+	const setBackgroundImage = useUiPreferencesStore((s) => s.setBackgroundImage);
+	const dialogGlow = useUiPreferencesStore((s) => s.dialogGlow);
+	const setDialogGlow = useUiPreferencesStore((s) => s.setDialogGlow);
 	const setCenterOrbEnabled = useUiPreferencesStore((s) => s.setCenterOrbEnabled);
 	const uiFontSize = useUiPreferencesStore((s) => s.uiFontSize);
 	const setUiFontSize = useUiPreferencesStore((s) => s.setUiFontSize);
@@ -222,14 +232,24 @@ function AppearanceBasics() {
 				</div>
 				<p className="mt-0.5 text-ui-11 leading-relaxed text-ink-faint">{t("settings.centerOrbHint")}</p>
 			</div>
-			<div>
-				<div className="flex items-center justify-between gap-4">
-					<h3 className="text-ui-13 font-medium text-ink">{t("settings.performanceMode")}</h3>
-					<Switch checked={performanceMode} onCheckedChange={setPerformanceMode} />
-				</div>
-				<p className="mt-0.5 text-ui-11 leading-relaxed text-ink-faint">
-					{t("settings.performanceModeHint")}
-				</p>
+			<div className="rounded-xl bg-hover/40 px-3 py-2">
+				<p className="mb-1 text-ui-11 font-medium text-ink-faint">{t("settings.visualEffects")}</p>
+				{(
+					[
+						["settings.fxMarquee", streamingMarquee, setStreamingMarquee],
+						["settings.fxPageSlide", pageSlide, setPageSlide],
+						["settings.fxOrbAnimation", orbAnimation, setOrbAnimation],
+						["settings.fxUiTransitions", uiTransitions, setUiTransitions],
+						["settings.fxBackgroundImage", backgroundImage, setBackgroundImage],
+						["settings.fxDialogGlow", dialogGlow, setDialogGlow],
+					] as const
+				).map(([labelKey, value, setter]) => (
+					<div key={labelKey} className="flex items-center justify-between gap-4 py-1">
+						<h3 className="text-ui-13 text-ink">{t(labelKey)}</h3>
+						<Switch checked={value} onCheckedChange={setter} />
+					</div>
+				))}
+				<p className="mt-1 text-ui-11 leading-relaxed text-ink-faint">{t("settings.visualEffectsHint")}</p>
 			</div>
 		</div>
 	);

@@ -92,11 +92,14 @@ export default function App() {
 		void initDailyDir();
 	}, []);
 
-	// 性能模式：根类挂在 <html>，globals.css 的 html.perf 规则统一关 CSS 动效 + 隐藏背景图层
-	const performanceMode = useUiPreferencesStore((s) => s.performanceMode);
+	// 视觉效果分项开关：CSS 动效总闸与弹窗发光挂 <html> 根类（globals.css 规则），背景图在渲染层短路
+	const uiTransitions = useUiPreferencesStore((s) => s.uiTransitions);
+	const backgroundImage = useUiPreferencesStore((s) => s.backgroundImage);
+	const dialogGlow = useUiPreferencesStore((s) => s.dialogGlow);
 	useEffect(() => {
-		document.documentElement.classList.toggle("perf", performanceMode);
-	}, [performanceMode]);
+		document.documentElement.classList.toggle("nofx", !uiTransitions);
+		document.documentElement.classList.toggle("no-dialog-glow", !dialogGlow);
+	}, [uiTransitions, dialogGlow]);
 
 	const respondTrust = (requestId: string, optionIndex: number) => {
 		void getPi().respondTrust({ requestId, answer: optionIndex });
@@ -108,7 +111,7 @@ export default function App() {
 
 	return (
 		<div className="relative h-full">
-			{bgImage && (
+			{bgImage && backgroundImage && (
 				<>
 					<div className="app-bg" style={{ backgroundImage: `url("${backgroundImageUrl(bgImage)}")` }} />
 					<div className="app-bg-scrim" style={{ opacity: bgDim }} />

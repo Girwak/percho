@@ -350,8 +350,7 @@ export const zh = {
 		},
 		language: "语言",
 		languageHint: "默认跟随系统语言",
-		appearance: {
-				},
+		appearance: {},
 		theme: "主题",
 		themeHint: "深色模式适合夜间使用，跟随系统则自动切换",
 
@@ -398,9 +397,14 @@ export const zh = {
 		centerOrb: "居中放大状态动画",
 		centerOrbHint:
 			"任务运行时在对话区域中央显示放大的状态动画（盖在文字之上，半透明遮罩压暗身后文字——工作时专心看动画即可）。只控制中央动画，Working/Thinking 状态行前的小动画始终显示。",
-		performanceMode: "性能模式",
-		performanceModeHint:
-			"关闭全部非必要视觉动效（流式跑马灯、页面切换过渡、状态动画、自定义背景图、CSS 过渡），低配置设备上保证基础操作流畅。默认关闭。",
+		visualEffects: "视觉效果",
+		visualEffectsHint: "按项关闭视觉动效，低配置设备上保证基础操作流畅。背景图的设置保留，只是暂停渲染。",
+		fxMarquee: "流式跑马灯",
+		fxPageSlide: "会话切换过渡",
+		fxOrbAnimation: "状态思考动画",
+		fxUiTransitions: "界面过渡动效",
+		fxBackgroundImage: "自定义背景图",
+		fxDialogGlow: "弹窗发光（暗色主题）",
 		lan: {
 			title: "跨设备互联",
 			hint: "在可信局域网内，用手机实时查看 agent 的运行进度。默认关闭；每次开启会轮换访问令牌。",

@@ -355,8 +355,7 @@ export const en: Messages = {
 		},
 		language: "Language",
 		languageHint: "Follows system language by default",
-		appearance: {
-				},
+		appearance: {},
 		theme: "Theme",
 		themeHint: "Dark mode is easier on the eyes at night; System follows your OS setting",
 
@@ -365,7 +364,8 @@ export const en: Messages = {
 		fontSizeUi: "UI font size",
 		fontSizeCode: "Code font size",
 		chatWidth: "Chat content width",
-		chatWidthHint: "Column width of the conversation area; Wide uses 90% of the viewport (capped at 1600px) for large displays",
+		chatWidthHint:
+			"Column width of the conversation area; Wide uses 90% of the viewport (capped at 1600px) for large displays",
 		chatWidthDefault: "Default",
 		chatWidthWide: "Wide",
 		fontSizePreset12: "Small",
@@ -403,9 +403,15 @@ export const en: Messages = {
 		centerOrb: "Centered status animation",
 		centerOrbHint:
 			"While a task is running, shows an enlarged status animation at the center of the conversation area (above the text, with a translucent scrim dimming whatever is behind it). Only controls the centered animation — the small orb before the Working/Thinking row always stays.",
-		performanceMode: "Performance mode",
-		performanceModeHint:
-			"Turns off all non-essential visual effects (streaming marquee, page slide transitions, orb animations, custom background, CSS transitions) to keep the app responsive on low-end hardware. Default off.",
+		visualEffects: "Visual effects",
+		visualEffectsHint:
+			"Turn individual effects off to keep the app responsive on low-end hardware. The custom background image setting is kept — only rendering is paused.",
+		fxMarquee: "Streaming marquee",
+		fxPageSlide: "Session slide transitions",
+		fxOrbAnimation: "Status orb animations",
+		fxUiTransitions: "Interface transitions",
+		fxBackgroundImage: "Custom background image",
+		fxDialogGlow: "Dialog glow (dark theme)",
 		lan: {
 			title: "Cross-device",
 			hint: "View live agent progress from your phone on a trusted local network. Off by default; the access token rotates every time it is enabled.",
@@ -515,7 +521,8 @@ export const en: Messages = {
 			retention30: "30 days",
 			retention90: "90 days",
 			retentionNever: "Never",
-			retentionHint: "Archived sessions older than the retention period are deleted while the app runs; \u201cNever\u201d keeps them until deleted manually.",
+			retentionHint:
+				"Archived sessions older than the retention period are deleted while the app runs; \u201cNever\u201d keeps them until deleted manually.",
 			purgeNow: "Clean up expired",
 			loading: "Loading\u2026",
 			empty: "No archived sessions",

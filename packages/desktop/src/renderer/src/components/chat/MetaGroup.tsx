@@ -3,7 +3,8 @@ import { Fragment, memo, useMemo } from "react";
 import type { OrbState } from "thinking-orbs";
 import { ThinkingOrb } from "thinking-orbs";
 import { useT } from "../../i18n";
-import { motionReduced } from "../../lib/motion";
+import { useSystemReducedMotion } from "../../lib/motion";
+import { useUiPreferencesStore } from "../../stores/ui-preferences";
 import { ExpandArrowIcon } from "../icons";
 import { summaryLabel } from "./meta-summary-label";
 import { type LivePreviewItem, PreviewTicker } from "./PreviewTicker";
@@ -81,6 +82,8 @@ export const MetaGroup = memo(function MetaGroup({
 	subagentCount?: number;
 }) {
 	const t = useT();
+	const orbAnimation = useUiPreferencesStore((s) => s.orbAnimation);
+	const systemReduced = useSystemReducedMotion();
 	const count = items.reduce((n, item) => n + (item.thinking ? 1 : 0) + item.tools.length, 0);
 	// 圆点序列：组内工具按到达顺序展开（working 期实时追加；组结束后随 items 冻结在原位）
 	const dots = useMemo(() => dotsFromItems(items), [items]);
@@ -155,7 +158,7 @@ export const MetaGroup = memo(function MetaGroup({
 						{shownWorking ? (
 							<>
 								<div className="flex shrink-0 items-center gap-2">
-									<ThinkingOrb state={orbState} size={20} paused={motionReduced()} />
+									<ThinkingOrb state={orbState} size={20} paused={!orbAnimation || systemReduced} />
 									<span
 										ref={labelRef}
 										className="sweep-target text-ui-14 font-bold text-ink-working transition-colors group-hover/row:text-ink"

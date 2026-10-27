@@ -20,8 +20,9 @@
 
 export type SessionSlideDirection = "push" | "pop";
 
+import { useUiPreferencesStore } from "../stores/ui-preferences";
 /** 页面容器的标记属性（App 里挂在聊天列上；过渡只在过渡期间给它加 view-transition-name） */
-import { motionReduced } from "./motion";
+import { systemReducedMotion } from "./motion";
 
 export const SESSION_PAGE_ATTR = "data-session-page";
 /** 页面容器上的会话标记：用来判定「新内容真的提交上屏了」 */
@@ -50,7 +51,7 @@ export async function withSessionSlide<T>(
 	const pane = doc.querySelector<HTMLElement>(`[${SESSION_PAGE_ATTR}]`);
 	const canSlide = shouldSlide({
 		hasApi: typeof doc.startViewTransition === "function",
-		reduceMotion: motionReduced(),
+		reduceMotion: systemReducedMotion() || !useUiPreferencesStore.getState().pageSlide,
 		hasPane: pane !== null,
 	});
 	if (!canSlide || !pane) return await action();

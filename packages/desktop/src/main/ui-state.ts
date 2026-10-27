@@ -128,7 +128,12 @@ function normalize(parsed: UiStateFileShape): UiState {
 		theme,
 		background: { image: typeof background?.image === "string" ? background.image : null, dim },
 		centerOrbEnabled: typeof parsed.centerOrbEnabled === "boolean" ? parsed.centerOrbEnabled : false,
-		performanceMode: typeof parsed.performanceMode === "boolean" ? parsed.performanceMode : false,
+		streamingMarquee: parsed.streamingMarquee !== false,
+		pageSlide: parsed.pageSlide !== false,
+		orbAnimation: parsed.orbAnimation !== false,
+		uiTransitions: parsed.uiTransitions !== false,
+		backgroundImage: parsed.backgroundImage !== false,
+		dialogGlow: parsed.dialogGlow !== false,
 		// 置顶列表：脏值（手改文件/旧版本）过滤成非空字符串数组（渲染侧另会忽略未知 id）
 		pinnedSessions: stringArray(parsed.pinnedSessions),
 		sessionPermissionModes: permissionModeMap(parsed.sessionPermissionModes),

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { motionReduced } from "../../lib/motion";
+import { useSystemReducedMotion } from "../../lib/motion";
 import { useThemeStore } from "../../stores/theme";
+import { useUiPreferencesStore } from "../../stores/ui-preferences";
 import { drawCenterOrb } from "./center-orb-draw";
 
 /**
@@ -36,6 +37,8 @@ export function CenterOrb({ visible }: { visible: boolean }) {
 	const [mounted, setMounted] = useState(false);
 	const [on, setOn] = useState(false);
 	const dark = useThemeStore((s) => s.resolved) === "dark";
+	const orbAnimation = useUiPreferencesStore((s) => s.orbAnimation);
+	const systemReduced = useSystemReducedMotion();
 
 	// 显隐驱动：visible → 挂载 + 下一帧点亮（首帧 opacity 0 走 transition 淡入）；
 	// !visible → 立即淡出，FADE_OUT_MS 后卸载（停 rAF、释放 canvas）
@@ -86,7 +89,7 @@ export function CenterOrb({ visible }: { visible: boolean }) {
 			ctx.clearRect(0, 0, BASE, BASE);
 			drawCenterOrb(ctx, BASE, t, dark);
 		};
-		if (motionReduced()) {
+		if (!orbAnimation || systemReduced) {
 			paint(0.6);
 			return;
 		}
@@ -97,7 +100,7 @@ export function CenterOrb({ visible }: { visible: boolean }) {
 		};
 		raf = requestAnimationFrame(tick);
 		return () => cancelAnimationFrame(raf);
-	}, [dark, px, mounted]);
+	}, [dark, px, mounted, orbAnimation, systemReduced]);
 
 	if (!mounted) return null;
 	return (
