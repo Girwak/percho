@@ -724,6 +724,13 @@ body {
 		outline: 2px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
 		outline-offset: 1px;
 	}
+	/* 恢复可点击元素的手型光标：Tailwind v4 preflight 把 button 默认 cursor 改回了 default。
+	   禁用态保持 default（不可点的暗示）；summary（details 折叠头）同语义。 */
+	button:not(:disabled),
+	[role="button"]:not(:disabled),
+	summary:not(:disabled) {
+		cursor: pointer;
+	}
 }
 
 /* 主题就绪（data-theme 写入）前 body 透明：透出窗口 backgroundColor（main 已按主题设置），
