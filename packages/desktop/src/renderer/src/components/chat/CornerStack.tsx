@@ -1,6 +1,4 @@
 import { type RefObject, useCallback, useEffect, useReducer, useRef } from "react";
-import { RegionHost } from "../../plugins/RegionHost";
-import { UI_REGIONS } from "../../plugins/slots";
 import { useChannelTopics } from "../../stores/channel-subscriptions";
 import { useSessionsStore } from "../../stores/sessions";
 import { ChannelSubscriptionPill } from "./ChannelSubscriptionPill";
@@ -10,7 +8,6 @@ import {
 	presenceForSession,
 	reduceChannelPill,
 } from "./channel-pill-presence";
-import { cornerStackLead } from "./corner-stack-layout";
 import { useTodoAnchor } from "./use-todo-anchor";
 
 /**
@@ -28,7 +25,7 @@ export function CornerStack({ slotHostRef }: { slotHostRef: RefObject<HTMLElemen
 	const activeSessionId = useSessionsStore((s) => s.activeSessionId);
 	const topics = useChannelTopics(activeSessionId);
 	const [presence, dispatch] = useReducer(reduceChannelPill, HIDDEN_PRESENCE);
-	const hasAnchor = useTodoAnchor({ slotHost: slotHostRef, stack: stackRef });
+	const _hasAnchor = useTodoAnchor({ slotHost: slotHostRef, stack: stackRef });
 
 	// 会话切换与订阅变化都在这一个 effect 里处理：**先 reset 再 sync** 的顺序是确定的，
 	// reset 保证旧会话的名字绝不串到新会话（不播退场动画），sync 再按新会话的订阅进/退场
@@ -46,7 +43,6 @@ export function CornerStack({ slotHostRef }: { slotHostRef: RefObject<HTMLElemen
 
 	// 渲染层立刻按会话过滤：切会话那一帧就隐藏旧内容（不等 effect 重置），旧名字绝不会画到新会话上
 	const visible = presenceForSession(presence, activeSessionId);
-	const lead = cornerStackLead(hasAnchor, visible.mounted);
 	return (
 		<div
 			ref={stackRef}
@@ -54,9 +50,6 @@ export function CornerStack({ slotHostRef }: { slotHostRef: RefObject<HTMLElemen
 			className="pointer-events-none absolute right-4 top-2 z-20 flex flex-col items-end gap-2"
 		>
 			<ChannelSubscriptionPill presence={visible} onExitFinished={handleExitFinished} />
-			<div style={{ marginTop: lead === 0 ? undefined : lead }} className="pointer-events-none">
-				<RegionHost region={UI_REGIONS.CornerTopRight} layout="flow" />
-			</div>
 		</div>
 	);
 }

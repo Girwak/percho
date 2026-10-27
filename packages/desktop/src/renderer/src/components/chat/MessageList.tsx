@@ -11,8 +11,6 @@ import {
 } from "react";
 import { useT } from "../../i18n";
 import { useEdgeFade } from "../../lib/use-edge-fade";
-import { Slot } from "../../plugins/Slot";
-import { UI_SLOTS } from "../../plugins/slots";
 import { useSessionsStore } from "../../stores/sessions";
 import { selectTranscript, useTranscriptStore } from "../../stores/transcript";
 import { useUiPreferencesStore } from "../../stores/ui-preferences";
@@ -296,12 +294,7 @@ export function MessageList() {
 		}
 		if (row.kind === "streamingSubagents") {
 			items.push(
-				<Slot
-					key={row.key}
-					name={UI_SLOTS.SubagentCard}
-					props={{ runs: row.runs }}
-					fallback={SubagentRunCard}
-				/>,
+				<SubagentRunCard key={row.key} runs={row.runs} />,
 			);
 			return;
 		}

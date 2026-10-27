@@ -6,7 +6,7 @@
 </p>
 <h1 align="center">Percho</h1>
 <p align="center">
-  Highly customizable desktop GUI for the <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">Pi coding agent</a> — the same engine as the Pi CLI, in a clean visual interface. Multi-session chat, visual tool approvals, built-in subagents, UI plugins, and custom themes.
+  Highly customizable desktop GUI for the <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">Pi coding agent</a> — the same engine as the Pi CLI, in a clean visual interface. Multi-session chat, visual tool approvals, built-in subagents, and custom themes.
 </p>
 <p align="center">
   Independently maintained <a href="https://github.com/Jaxton07/percho">fork</a>, versioned from <code>1.0.0</code> (current upstream base: <code>0.6.5</code>). See <a href="#fork-versioning">Fork versioning</a>.
@@ -42,8 +42,6 @@ This repository is an independently maintained fork of [Jaxton07/percho](https:/
 
 ![Percho per-turn diff sidebar](docs/assets/img/chat_003.png)
 
-![UI plugins settings — the whale maid desk pet ships built in](docs/assets/img/percho_ui_plugins.png)
-
 **Chat**
 
 ![Chat page demo](docs/assets/img/demo-chat.gif)
@@ -62,7 +60,6 @@ Percho embeds the official Pi SDK (`@earendil-works/pi-coding-agent`) in the Ele
 
 And for those who prefer a GUI over a TUI:
 
-- Highly customizable UI — swap tool-call cards, drop in desk-pet overlays (two whale-maid pets ship built in), or extend the settings panel via UI plugins
 - Visual permission gates — approve or deny each tool call from a dock, backed by a per-tool rule engine
 - A collapsible project/session sidebar, draggable pinned-session pills, per-session composer drafts, and a follow-up queue with undo
 - Built-in subagents — a scout plus your own agent definitions, parallel task fan-outs, and run cards you can click to inspect the sub-session read-only

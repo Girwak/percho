@@ -19,7 +19,6 @@ export {
 	type SubscriptionApi,
 	type SubscriptionChannel,
 	type SubscriptionPayload,
-	UI_PLUGINS_CHANNELS,
 } from "./ipc-channels";
 
 /** Invoke and subscription members come from their own tables; native synchronous fields stay explicit. */

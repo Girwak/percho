@@ -3,8 +3,6 @@ import { Fragment, memo, useMemo } from "react";
 import type { OrbState } from "thinking-orbs";
 import { ThinkingOrb } from "thinking-orbs";
 import { useT } from "../../i18n";
-import { Slot } from "../../plugins/Slot";
-import { UI_SLOTS } from "../../plugins/slots";
 import { ExpandArrowIcon } from "../icons";
 import { summaryLabel } from "./meta-summary-label";
 import { type LivePreviewItem, PreviewTicker } from "./PreviewTicker";
@@ -97,7 +95,7 @@ export const MetaGroup = memo(function MetaGroup({
 		// biome-ignore lint/suspicious/noArrayIndexKey: 折叠组内项无独立 id，列表顺序稳定
 		item.thinking ? <ThinkingRow key={`thinking-${i}`} thinking={item.thinking} /> : null,
 		...item.tools.map((tool) => (
-			<Slot key={tool.key} name={UI_SLOTS.ToolCallCard} props={{ tool }} fallback={ToolCallCard} />
+			<ToolCallCard key={tool.key} tool={tool} />
 		)),
 	]);
 	// orb 状态（名字是包的渲染器名，与我们的语义不同名）：

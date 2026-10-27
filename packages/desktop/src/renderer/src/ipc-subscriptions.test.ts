@@ -12,7 +12,6 @@ const LEGACY_SUBSCRIPTION_SNAPSHOT = [
 	["onProviderLoginEvent", "SettingsLoginEvent", "settings:loginEvent"],
 	["onMcpServersChanged", "McpServersChanged", "mcp:serversChanged"],
 	["onChannelSubscriptionsChanged", "ChannelSubscriptionsChanged", "channel:subscriptionsChanged"],
-	["onUiPluginsEvent", "UiPluginsEvent", "uiPlugins:event"],
 	["onQuitRequested", "QuitRequested", "app:quit-requested"],
 	["onUpdateEvent", "UpdateEvent", "update:event"],
 	["onEvent", "Event", "pi:event"],
@@ -106,16 +105,16 @@ describe("single-source subscription contract and real bundled preload", () => {
 		const { api, listeners } = bootPreload();
 		const first = vi.fn(),
 			second = vi.fn();
-		const offFirst = api.onUiPluginsEvent(first),
-			offSecond = api.onUiPluginsEvent(second);
+		const offFirst = api.onMcpServersChanged(first),
+			offSecond = api.onMcpServersChanged(second);
 		offFirst();
 		offFirst();
-		const payload = { kind: "config" };
-		for (const listener of listeners.get(IpcChannels.UiPluginsEvent) ?? []) listener({}, payload);
+		const payload = { servers: [] };
+		for (const listener of listeners.get(IpcChannels.McpServersChanged) ?? []) listener({}, payload);
 		expect(first).not.toHaveBeenCalled();
 		expect(second).toHaveBeenCalledWith(payload);
 		offSecond();
-		expect(listeners.get(IpcChannels.UiPluginsEvent)?.size).toBe(0);
+		expect(listeners.get(IpcChannels.McpServersChanged)?.size).toBe(0);
 		const quit = vi.fn();
 		api.onQuitRequested(quit);
 		for (const listener of listeners.get(IpcChannels.QuitRequested) ?? []) listener({});
@@ -171,17 +170,17 @@ function compileFixture(body: string) {
 describe("actual TypeScript diagnostics, not uncompiled @ts-expect-error comments", () => {
 	it("accepts matching main send/forward, consumer payload inference and void unsubscribe/quit", () => {
 		expect(
-			compileFixture(`sendToRenderer(IpcChannels.UiPluginsEvent, {kind: "config"});
-forward((handler: (payload: {kind: "config"}) => void) => handler({kind:"config"}), IpcChannels.UiPluginsEvent);
-api.onUiPluginsEvent(payload => { const kind: string = payload.kind; });
+			compileFixture(`sendToRenderer(IpcChannels.McpServersChanged, {servers: []});
+forward((handler: (payload: {servers: unknown[]}) => void) => handler({servers:[]}), IpcChannels.McpServersChanged);
+api.onMcpServersChanged(payload => { const servers: unknown[] = payload.servers; });
 const off: () => void = api.onQuitRequested(() => {}); off();
 sendToRenderer(IpcChannels.QuitRequested, undefined);`),
 		).toEqual([]);
 	}, 20000);
 	it("rejects wrong send payload, source, callback, zero-arg quit, return type and unknown channel", () => {
-		const diagnostics = compileFixture(`sendToRenderer(IpcChannels.UiPluginsEvent, {unexpected: 1});
-forward((handler: (payload: number) => void) => handler(1), IpcChannels.UiPluginsEvent);
-api.onUiPluginsEvent((payload: number) => {});
+		const diagnostics = compileFixture(`sendToRenderer(IpcChannels.McpServersChanged, {unexpected: 1});
+forward((handler: (payload: number) => void) => handler(1), IpcChannels.McpServersChanged);
+api.onMcpServersChanged((payload: number) => {});
 api.onQuitRequested((payload: undefined) => {});
 const bad: Promise<void> = api.onQuitRequested(() => {});
 sendToRenderer("invalid:channel", undefined);

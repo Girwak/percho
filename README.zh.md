@@ -6,7 +6,7 @@
 </p>
 <h1 align="center">Percho</h1>
 <p align="center">
-  高度自定义的 <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">Pi coding agent</a> 桌面端 GUI —— 与 Pi CLI 同源同引擎，干净清爽的视觉界面。多会话聊天、可视化工具审批、内置子代理、UI 插件、自定义主题。
+  高度自定义的 <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent">Pi coding agent</a> 桌面端 GUI —— 与 Pi CLI 同源同引擎，干净清爽的视觉界面。多会话聊天、可视化工具审批、内置子代理、自定义主题。
 </p>
 <p align="center">
   <a href="https://github.com/Jaxton07/percho">上游项目</a>的独立维护 Fork，版本号自 <code>1.0.0</code> 起独立演进（当前基于上游 <code>0.6.5</code>），详见 <a href="#fork-版本方案">Fork 版本方案</a>。
@@ -42,8 +42,6 @@
 
 ![Percho 逐轮改动侧栏](docs/assets/img/chat_003.png)
 
-![设置 —— UI 插件管理，内置鲸鱼娘桌宠](docs/assets/img/percho_ui_plugins.png)
-
 **聊天页**
 
 ![聊天页演示](docs/assets/img/demo-chat.gif)
@@ -62,7 +60,6 @@ Percho 把官方 Pi SDK（`@earendil-works/pi-coding-agent`）跑在 Electron �
 
 同时，为更喜欢图形界面的用户提供：
 
-- 高度自定义界面 —— UI 插件可替换工具调用卡、添加桌宠浮层（内置鲸鱼娘 + Q 版两只）、扩展设置面板
 - 可视化权限审批 —— 在底部审批坞里逐个批准/拒绝工具调用，背后是逐工具的规则引擎
 - 可折叠的项目/会话侧栏、可拖拽排序的顶部置顶会话、逐会话输入草稿、可撤销的跟进消息队列
 - 内置子代理 —— 自带 scout 与自定义 agent 定义、并行任务拆分，点开运行卡片即可只读检视子会话

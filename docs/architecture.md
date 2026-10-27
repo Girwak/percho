@@ -15,7 +15,6 @@
 
 preload 保持 CJS 与 sandbox 兼容。生产相对导入图三域无环；纯函数与常量放叶模块，不放在会反向导入其消费者的 store 或 barrel 上。
 
-UI 插件的槽位/区域标识以 shared `ui-plugins.ts` 为单源。新增对插件公开的 hook/store 时，同步核对 renderer `plugins/host-api.ts`、`env.d.ts`、main `ui-plugins/build.ts` shim、发布的 `resources/ui-plugins/percho-ui.d.ts` 与 SPEC；使用现有契约守护测试，不手抄第二份 API。
 
 ## 会话数据不是一张表
 
