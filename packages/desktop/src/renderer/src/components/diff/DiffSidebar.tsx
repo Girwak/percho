@@ -1,11 +1,13 @@
 import { deriveTurnChanges, type TurnChanges } from "@percho/shared";
 import { useEffect, useMemo, useRef, useState } from "react";
+
 import { getPi } from "../../api";
 import { useT } from "../../i18n";
 import { selectActiveCwd } from "../../lib/active-cwd";
 import { useSessionsStore } from "../../stores/sessions";
 import { useTranscriptStore } from "../../stores/transcript";
 import { useUiStore } from "../../stores/ui";
+import { useUiPreferencesStore } from "../../stores/ui-preferences";
 import { CloseIcon } from "../icons";
 import { DiffFileCard } from "./DiffFileCard";
 
@@ -98,6 +100,8 @@ function BranchRow() {
  */
 export function DiffSidebar({ embedded = false }: { embedded?: boolean }) {
 	const t = useT();
+	// 嵌入页有效信息宽度跟随聊天列宽模式（default 760 / wide 90% 封顶 1600），与对话内容对齐
+	const chatWide = useUiPreferencesStore((s) => s.chatColumnWidthMode === "wide");
 	const open = useUiStore((s) => s.diffSidebarOpen) || embedded;
 	const setOpen = useUiStore((s) => s.setDiffSidebarOpen);
 	const diffFocus = useUiStore((s) => s.diffFocus);
@@ -158,7 +162,7 @@ export function DiffSidebar({ embedded = false }: { embedded?: boolean }) {
 
 	return (
 		<aside
-			className={`diff-sidebar ${embedded ? "diff-sidebar-embedded" : ""}${open ? " open" : ""}`}
+			className={`diff-sidebar ${embedded ? `diff-sidebar-embedded ${chatWide ? "diff-wide" : ""}` : ""}${open ? " open" : ""}`}
 			aria-hidden={!open}
 			inert={!open}
 		>

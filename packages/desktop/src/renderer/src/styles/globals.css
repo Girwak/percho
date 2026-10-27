@@ -1589,8 +1589,14 @@ code {
 	transition: none;
 }
 .diff-sidebar-embedded .diff-sidebar-in {
-	max-width: 860px;
 	margin: 0 auto;
+}
+/* 有效信息宽度与聊天内容列对齐（设置→外观聊天列宽 default 760 / wide 90% 封顶 1600） */
+.diff-sidebar-embedded:not(.diff-wide) .diff-sidebar-in {
+	max-width: 760px;
+}
+.diff-sidebar-embedded.diff-wide .diff-sidebar-in {
+	max-width: min(90%, 1600px);
 }
 .diff-side-head {
 	flex: none;
