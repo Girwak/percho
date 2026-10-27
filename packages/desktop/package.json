@@ -3,7 +3,7 @@
 	"version": "1.0.1",
 	"private": true,
 	"description": "Desktop GUI for the Pi coding agent",
-	"author": "Girwak",
+	"author": "Jaxton07",
 	"license": "MIT",
 	"type": "module",
 	"main": "./out/main/index.js",

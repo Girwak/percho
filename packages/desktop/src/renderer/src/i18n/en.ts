@@ -97,12 +97,8 @@ export const en: Messages = {
 		queueFull: "A message is already queued — take it back first",
 		removeQuote: "Remove quote",
 		permissionMode: "Permission mode",
-		permissionChatOnly: "Chat only",
 		permissionDefault: "Default",
 		permissionFullAccess: "Full access",
-		permissionChatOnlyTitle: "Chat only",
-		permissionChatOnlyDesc:
-			"Read-only discussion: file writes, commands and subagents are blocked — current session only",
 		permissionDefaultTitle: "Default",
 		permissionDefaultDesc: "High-risk operations ask for confirmation per permission rules",
 		permissionFullAccessTitle: "Full access",

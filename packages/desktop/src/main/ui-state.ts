@@ -46,7 +46,7 @@ function permissionModeMap(value: unknown): Record<string, PermissionMode> {
 	const out: Record<string, PermissionMode> = {};
 	for (const [sessionId, mode] of Object.entries(value as Record<string, unknown>)) {
 		if (sessionId === "") continue;
-		if (mode === "chatOnly" || mode === "fullAccess") out[sessionId] = mode;
+		if (mode === "fullAccess") out[sessionId] = mode;
 	}
 	return out;
 }

@@ -58,6 +58,6 @@ UI 插件的槽位/区域标识以 shared `ui-plugins.ts` 为单源。新增对�
 
 归档会话移入 `~/.pi/agent/archived-sessions/`（镜像 sessions 布局，backend `session/archive.ts` 单一实现）；归档即从导航与工作区摘除并清理 traces，恢复移回原位。保留期读 settings.json 键 `archiveRetentionDays`（null=永不，损坏/缺失回退默认 7 天），启动对账 manifest 后每 24 小时清理过期归档。
 
-权限模式属于会话，不是改写全局权限规则；第三方扩展的通用 confirm 不是工具授权。模式三档：chatOnly（只读白名单，读工具照走求值链，写/命令/子代理/MCP 直接拦截，并由 backend 在每轮注入只读纪律段到 system prompt）、default（按规则审批）、fullAccess（一切放行 + 高危调用写审计）。MCP/第三方工具无只读声明时不能默认放行，求值链以 backend `permissions/` 为准。
+权限模式属于会话，不是改写全局权限规则；第三方扩展的通用 confirm 不是工具授权。MCP/第三方工具无只读声明时不能默认放行，求值链以 backend `permissions/` 为准。
 
 凭证不写入文档、日志或测试夹具；重放和验收使用隔离数据，不把正式目录当可变测试环境。
