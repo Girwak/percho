@@ -400,6 +400,10 @@ export const en: Messages = {
 		sessionRail: "Left session rail",
 		sessionRailHint:
 			"A column of short lines at the left edge of the chat area (off by default): hover or focus expands one into a capsule with its title and status. The rail and the top bar show the same temporary workspace; turning both off clears it (running tasks are unaffected — they just stop being recorded).",
+
+		sidebarEmbedded: "Embed sidebar in main view",
+		sidebarEmbeddedHint:
+			"The sidebar becomes a full navigation page inside the main view instead of a side column: toggle it with the top-bar button, and picking a session returns to chat. Works even when top-bar session pills are hidden.",
 		centerOrb: "Centered status animation",
 		centerOrbHint:
 			"While a task is running, shows an enlarged status animation at the center of the conversation area (above the text, with a translucent scrim dimming whatever is behind it). Only controls the centered animation — the small orb before the Working/Thinking row always stays.",

@@ -762,8 +762,11 @@ body {
 html.nofx *,
 html.nofx *::before,
 html.nofx *::after {
+	/* biome-ignore lint/complexity/noImportantStyles: 总闸语义必须压过 utilities 层的零散 transition/animation 类 */
 	animation-duration: 0.01ms !important;
+	/* biome-ignore lint/complexity/noImportantStyles: 同上 */
 	animation-iteration-count: 1 !important;
+	/* biome-ignore lint/complexity/noImportantStyles: 同上 */
 	transition-duration: 0.01ms !important;
 }
 /* 弹窗发光开关（html.no-dialog-glow，设置→外观）：暗色下 shadow-dialog 的白色发光投影
@@ -1506,6 +1509,20 @@ code {
 .sidebar.is-collapsed .sidebar-inner {
 	opacity: 0;
 	transform: translateX(-28px);
+}
+
+/* 嵌入模式（设置→外观「侧栏嵌入主视图」）：侧栏不再占左侧固定宽列，而是主视图内的整幅导航页。
+   宽度交给容器；列表超宽屏居中限宽（拉满一行不可读）；右缘分界线（fade-rule-v）在该形态无意义 */
+.sidebar-embedded {
+	flex: 1 1 auto;
+	width: 100%;
+	height: 100%;
+	transition: none;
+}
+.sidebar-embedded .sidebar-inner {
+	width: 100%;
+	max-width: 860px;
+	margin: 0 auto;
 }
 /* 分组展开/收起：grid 0fr→1fr 让未知高度（空态/任意行数的列表）共用一套动画，
    内层 overflow:hidden 只负责裁切；列表自己**不滚**（整条左栏只有一个外层滚动容器，v13 统一滚动）。 */

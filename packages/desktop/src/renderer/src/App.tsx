@@ -96,10 +96,19 @@ export default function App() {
 	const uiTransitions = useUiPreferencesStore((s) => s.uiTransitions);
 	const backgroundImage = useUiPreferencesStore((s) => s.backgroundImage);
 	const dialogGlow = useUiPreferencesStore((s) => s.dialogGlow);
+	const sidebarEmbedded = useUiPreferencesStore((s) => s.sidebarEmbedded);
+	const sidebarCollapsed = useUiPreferencesStore((s) => s.sidebarCollapsed);
 	useEffect(() => {
 		document.documentElement.classList.toggle("nofx", !uiTransitions);
 		document.documentElement.classList.toggle("no-dialog-glow", !dialogGlow);
 	}, [uiTransitions, dialogGlow]);
+
+	// 嵌入式侧栏：任何会话被激活（嵌入列表点击/顶栏胶囊/启动恢复）即收起导航页，回到聊天
+	useEffect(() => {
+		if (sidebarEmbedded && !sidebarCollapsed && activeSessionId) {
+			useUiPreferencesStore.getState().collapseSidebar();
+		}
+	}, [sidebarEmbedded, sidebarCollapsed, activeSessionId]);
 
 	const respondTrust = (requestId: string, optionIndex: number) => {
 		void getPi().respondTrust({ requestId, answer: optionIndex });
@@ -123,7 +132,7 @@ export default function App() {
 				   设置里的开关只控制「是否显示置顶会话胶囊」（见 SessionTabBar） */}
 				<SessionTabBar />
 				<div className="relative flex min-h-0 flex-1">
-					<Sidebar />
+					{!sidebarEmbedded && <Sidebar />}
 					{/* 聊天页容器：会话推/出过渡的动画主体（lib/session-page-slide.ts 认 data-session-page 找它，
 					   用 data-session-id 判定「新内容已上屏」）。顶栏与左栏不在此容器内 ⇒ 导航时保持静态 */}
 					<div

@@ -134,6 +134,7 @@ function normalize(parsed: UiStateFileShape): UiState {
 		uiTransitions: parsed.uiTransitions !== false,
 		backgroundImage: parsed.backgroundImage !== false,
 		dialogGlow: parsed.dialogGlow !== false,
+		sidebarEmbedded: parsed.sidebarEmbedded === true,
 		// 置顶列表：脏值（手改文件/旧版本）过滤成非空字符串数组（渲染侧另会忽略未知 id）
 		pinnedSessions: stringArray(parsed.pinnedSessions),
 		sessionPermissionModes: permissionModeMap(parsed.sessionPermissionModes),
