@@ -29,6 +29,7 @@ import { useSessionsStore } from "./stores/sessions";
 import { useHasParentRelation } from "./stores/subagent-return";
 import { backgroundImageUrl, useThemeStore } from "./stores/theme";
 import { useTranscriptStore } from "./stores/transcript";
+import { useUiStore } from "./stores/ui";
 import { useUiPreferencesStore } from "./stores/ui-preferences";
 import { initUpdateStore } from "./stores/update";
 
@@ -92,6 +93,19 @@ export default function App() {
 		void initDailyDir();
 	}, []);
 
+	// 视觉效果分项开关：CSS 动效总闸与弹窗发光挂 <html> 根类（globals.css 规则），背景图在渲染层短路
+	const uiTransitions = useUiPreferencesStore((s) => s.uiTransitions);
+	const backgroundImage = useUiPreferencesStore((s) => s.backgroundImage);
+	const dialogGlow = useUiPreferencesStore((s) => s.dialogGlow);
+	const diffEmbedded = useUiPreferencesStore((s) => s.diffSidebarEmbedded);
+	const diffOpen = useUiStore((s) => s.diffSidebarOpen);
+	// 嵌入形态且展开时:变更视图占主视图,聊天内容保活(仅隐藏)
+	const diffPage = diffEmbedded && diffOpen;
+	useEffect(() => {
+		document.documentElement.classList.toggle("nofx", !uiTransitions);
+		document.documentElement.classList.toggle("no-dialog-glow", !dialogGlow);
+	}, [uiTransitions, dialogGlow]);
+
 	const respondTrust = (requestId: string, optionIndex: number) => {
 		void getPi().respondTrust({ requestId, answer: optionIndex });
 		setTrustRequests((prev) => prev.filter((req) => req.id !== requestId));
@@ -102,7 +116,7 @@ export default function App() {
 
 	return (
 		<div className="relative h-full">
-			{bgImage && (
+			{bgImage && backgroundImage && (
 				<>
 					<div className="app-bg" style={{ backgroundImage: `url("${backgroundImageUrl(bgImage)}")` }} />
 					<div className="app-bg-scrim" style={{ opacity: bgDim }} />
@@ -127,24 +141,31 @@ export default function App() {
 						<SessionRail />
 						{/* 右侧 DiffSidebar 是独立浮层，不参与中间聊天列宽度与布局动画。 */}
 						<main className="relative min-h-0 flex-1">
-							{showEmpty ? <EmptyState /> : <MessageList />}
-							{/* Todo 面板宿主：display:contents 不产生盒子（Todo 的原绝对定位不受影响），
+							<div className={diffPage ? "hidden" : "contents"}>
+								{showEmpty ? <EmptyState /> : <MessageList />}
+								{/* Todo 面板宿主：display:contents 不产生盒子（Todo 的原绝对定位不受影响），
 							    只给 CornerStack 一个可 observe 的挂载点（它去测量渲染根的实际底边） */}
-							<div ref={todoSlotHostRef} style={{ display: "contents" }}>
-								<TodoPanel />
-							</div>
-							{/* 右上角：频道胶囊 + top-right 贡献共用一个堆叠（CornerStack），一起避开 Todo 实际底边；
+								<div ref={todoSlotHostRef} style={{ display: "contents" }}>
+									<TodoPanel />
+								</div>
+								{/* 右上角：频道胶囊 + top-right 贡献共用一个堆叠（CornerStack），一起避开 Todo 实际底边；
 							    top-left 用 leading 插返回父会话入口，与左上区域贡献共用同一定位容器 */}
-							<CornerStack slotHostRef={todoSlotHostRef} />
-							{hasParentRelation && (
-								<div className="pointer-events-none absolute z-20 flex flex-col gap-2 top-2 left-4">
-									<SubagentBackButton />
+								<CornerStack slotHostRef={todoSlotHostRef} />
+								{hasParentRelation && (
+									<div className="pointer-events-none absolute z-20 flex flex-col gap-2 top-2 left-4">
+										<SubagentBackButton />
+									</div>
+								)}
+							</div>
+							{diffPage && (
+								<div className="absolute inset-0">
+									<DiffSidebar embedded />
 								</div>
 							)}
 						</main>
 						<DockSlot sessionId={activeSessionId} hideComposer={showEmpty} />
 					</div>
-					<DiffSidebar />
+					{!diffPage && <DiffSidebar />}
 				</div>
 			</div>
 			<SettingsDialog />

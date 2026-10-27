@@ -111,7 +111,14 @@ import {
 	resolveRecallEntryId,
 	toBranchSessionMessages,
 } from "./session/messages";
-import { autoNameSession } from "./session/naming";
+import {
+	assistantTextOf,
+	autoNameSession,
+	fillMissingSessionNames,
+	SESSION_TITLE_PROMPT,
+	sanitizeAiTitle,
+	userTextOf,
+} from "./session/naming";
 import { EventRateTracker } from "./session/rates";
 import {
 	type EventForwarder,
@@ -131,6 +138,7 @@ import { ModelPrefsService } from "./settings/model-prefs";
 import { makeQuotaService } from "./settings/quota";
 import { SettingsService } from "./settings/settings";
 import { slashCommandsForLoader, slashCommandsForSession } from "./slash-commands";
+import { ASK_USER_TOOL_NAME, AskUserQuestionHost, makeAskUserQuestionTool } from "./tools/ask-user-question";
 import {
 	makeChannelWatchExtension,
 	readChannelWatchEnabled,
@@ -144,7 +152,6 @@ import {
 	writeContextManagerMode,
 } from "./tools/context-evaporation";
 import { collectMcpTools, makeMcpInventoryExtension } from "./tools/mcp-inventory";
-import { ASK_USER_TOOL_NAME, AskUserQuestionHost, makeAskUserQuestionTool } from "./tools/ask-user-question";
 import { makeShowImageTool } from "./tools/show-image";
 import { discoverAgents, isSubagentSessionPath, makeSubagentTool } from "./tools/subagent";
 import { applySubagentMutex, resolveSubagentPreferBuiltin } from "./tools/subagent/mutex";
@@ -284,6 +291,10 @@ export class PiBackend {
 	readonly settings = new SettingsService(() => this.getModelRuntime());
 	/** opencode-go 套餐额度（TTL 缓存；无 key 返回 null） */
 	private readonly quota = makeQuotaService(() => this.getModelRuntime());
+	/** 自动名记录（message_start 首行名）：AI 标题升级前判断「用户是否已手动改名」 */
+	private readonly autoTitleNames = new Map<string, string>();
+	/** 已做过 AI 标题升级的会话（每会话至多自动升级一次；手动重生成走 regenerateSessionTitle 不受限） */
+	private readonly aiTitledSessions = new Set<string>();
 	/** provider 交互登录服务（OAuth + api_key 交互，如 Google Vertex），事件经 onLoginEvent 分发 */
 	readonly login = new LoginService({
 		getRuntime: () => this.getModelRuntime(),
@@ -310,7 +321,11 @@ export class PiBackend {
 	}
 
 	/** 自定义工具 = 调用方传入的 + 内置 webfetch（webFetch:false 关闭）+ show_image + todo + ask_user_question + subagent */
-	private buildCustomTools(gate: PermissionGate, preferBuiltin: boolean, askUser: AskUserQuestionHost): ToolDefinition[] {
+	private buildCustomTools(
+		gate: PermissionGate,
+		preferBuiltin: boolean,
+		askUser: AskUserQuestionHost,
+	): ToolDefinition[] {
 		const tools = [...(this.options.customTools ?? [])];
 		const webFetch = this.options.webFetch;
 		if (webFetch !== false) {
@@ -665,6 +680,23 @@ export class PiBackend {
 		const dialogs = await this.bindSessionExtensions(session, session.sessionId);
 		const unsubscribe = session.subscribe((event) => {
 			autoNameSession(session, event);
+			// AI 标题升级：首轮结束后用会话模型把首行名升级为 ≤8 字无标点的语义标题。
+			// 只在「用户没手动改名」（当前名 = 自动名）时触发；失败保留首行名（自动名仍可用）
+			if (event.type === "message_start" && event.message.role === "user") {
+				const autoName = session.sessionManager.getSessionName();
+				if (autoName && !this.autoTitleNames.has(session.sessionId)) {
+					this.autoTitleNames.set(session.sessionId, autoName);
+				}
+			}
+			if (
+				event.type === "turn_end" &&
+				event.message.role === "assistant" &&
+				!readOnly &&
+				!this.aiTitledSessions.has(session.sessionId)
+			) {
+				this.aiTitledSessions.add(session.sessionId);
+				void this.upgradeTitleWithAi(session, this.autoTitleNames.get(session.sessionId));
+			}
 			// D8：自研触发的那次压缩在 UI 上说「自动（上下文阈值）」——只改转发副本
 			this.emitEvent(session.sessionId, this.guardTriggerMarkers.rewrite(session.sessionId, event));
 		});
@@ -712,24 +744,26 @@ export class PiBackend {
 	async listSessions(cwd?: string): Promise<SessionMeta[]> {
 		const target = cwd || this.options.defaultCwd || process.cwd();
 		const activeIds = this.activeSessionIds();
-		return (await SessionManager.list(target))
-			.filter((info) => !activeIds.has(info.id))
-			.map((info) => sessionInfoToMeta(info, { cwdFallback: target, active: false }));
+		const infos = (await SessionManager.list(target)).filter((info) => !activeIds.has(info.id));
+		// 无名会话（CLI 创建/老会话）离线推导标题：侧栏不再退化为目录名
+		await fillMissingSessionNames(infos);
+		return infos.map((info) => sessionInfoToMeta(info, { cwdFallback: target, active: false }));
 	}
 
 	/** 跨全部项目目录枚举会话（项目管理页用，含活跃会话） */
 	async listAllSessions(): Promise<SessionMeta[]> {
 		const activeIds = this.activeSessionIds();
-		return (await SessionManager.listAll())
-			.filter((info) => info.cwd)
-			.map((info) =>
-				sessionInfoToMeta(info, {
-					cwdFallback: "",
-					active: activeIds.has(info.id),
-					// subagent 产物会话只读（LAN 列表/写端点禁用判定用）
-					readOnly: isSubagentSessionPath(info.path) || undefined,
-				}),
-			);
+		const infos = (await SessionManager.listAll()).filter((info) => info.cwd);
+		// 无名会话（CLI 创建/老会话）离线推导标题：侧栏不再退化为目录名
+		await fillMissingSessionNames(infos);
+		return infos.map((info) =>
+			sessionInfoToMeta(info, {
+				cwdFallback: "",
+				active: activeIds.has(info.id),
+				// subagent 产物会话只读（LAN 列表/写端点禁用判定用）
+				readOnly: isSubagentSessionPath(info.path) || undefined,
+			}),
+		);
 	}
 
 	private activeSessionIds(): Set<string> {
@@ -1814,6 +1848,70 @@ export class PiBackend {
 		this.trustGate.dispose();
 		this.traces.disposeAll();
 		log.info("backend disposed");
+	}
+
+	/** AI 标题升级：首轮结束后用会话模型概括首条用户消息为 ≤8 字无标点标题。
+	 *  15s 超时/失败/空结果都保留首行名；升级期间用户手动改名（名字≠自动名）则放弃覆盖。 */
+	private async upgradeTitleWithAi(session: AgentSession, autoName: string | undefined): Promise<void> {
+		try {
+			if (!session.model) return;
+			const text = userTextOf(session.messages.find((m) => m.role === "user"));
+			if (!text.trim()) return;
+			const runtime = await this.getModelRuntime();
+			const assistant = await Promise.race([
+				runtime.complete(session.model, {
+					messages: [
+						{
+							role: "user",
+							content: `${SESSION_TITLE_PROMPT}
+
+${text.slice(0, 800)}`,
+							timestamp: Date.now(),
+						},
+					],
+				}),
+				new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 15_000)),
+			]);
+			if (!assistant) return;
+			const title = sanitizeAiTitle(assistantTextOf(assistant));
+			if (!title) return;
+			if (session.sessionManager.getSessionName() !== autoName) return;
+			session.setSessionName(title);
+		} catch {
+			// 失败保留首行名（自动名仍是可用标题），不打断会话
+		}
+	}
+
+	/** AI 重新命名（右键菜单）：用会话模型把首条用户消息概括为 ≤8 字无标点标题，立即生效。
+	 *  仅支持已打开的会话（需要内存消息与会话模型；未打开/只读/无消息抛错由 renderer toast）。 */
+	async regenerateSessionTitle(sessionId: string): Promise<string> {
+		const entry = this.requireSession(sessionId);
+		if (entry.readOnly) throw new Error("只读会话不支持重命名");
+		const session = entry.session;
+		const model = session.model;
+		if (!model) throw new Error("当前会话没有可用模型");
+		const text = userTextOf(session.messages.find((m) => m.role === "user"));
+		if (!text.trim()) throw new Error("会话内没有用户消息，无法生成标题");
+		const runtime = await this.getModelRuntime();
+		const assistant = await Promise.race([
+			runtime.complete(model, {
+				messages: [
+					{
+						role: "user",
+						content: `${SESSION_TITLE_PROMPT}
+
+${text.slice(0, 800)}`,
+						timestamp: Date.now(),
+					},
+				],
+			}),
+			new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 20_000)),
+		]);
+		if (!assistant) throw new Error("生成超时，请重试");
+		const title = sanitizeAiTitle(assistantTextOf(assistant));
+		if (!title) throw new Error("AI 未能生成有效标题，请重试");
+		session.setSessionName(title);
+		return title;
 	}
 
 	private requireSession(sessionId: string) {

@@ -39,7 +39,13 @@ import { ContextMenu, type ContextMenuItem } from "../ui/ContextMenu";
 import type { MenuAnchor } from "../ui/place-menu";
 import { RenamePopover } from "./RenamePopover";
 import { SessionAvatar } from "./SessionAvatar";
-import { archiveSession, canOpenSessionMenu, renameSession, sessionMenuItems } from "./session-menu";
+import {
+	aiRenameSession,
+	archiveSession,
+	canOpenSessionMenu,
+	renameSession,
+	sessionMenuItems,
+} from "./session-menu";
 import { sessionTitle, useSessionStatus } from "./session-status";
 import { UpdateButton } from "./UpdateButton";
 
@@ -302,6 +308,7 @@ export function SessionTabBar() {
 		return sessionMenuItems(t, {
 			sessionId,
 			pinned: pinnedSessions.includes(sessionId),
+			onAiRename: () => aiRenameSession(sessionId),
 			onRename: () => setRenaming(menu),
 			onArchive: session?.sessionFile ? () => void archiveSession(session) : undefined,
 		});
@@ -353,7 +360,9 @@ export function SessionTabBar() {
 				// 可测试性只读属性（CDP 验收按它点左栏开合，避免按 aria-label 文案匹配；不影响视觉/交互）
 				data-sidebar-toggle=""
 				className={`no-drag shrink-0 rounded-lg p-1.5 transition-colors ${
-					sidebarCollapsed ? "text-ink-dim hover:bg-hover hover:text-ink" : "bg-hover text-ink"
+					sidebarCollapsed
+						? "text-ink-dim hover:bg-ink/10 hover:text-ink"
+						: "bg-hover text-ink hover:bg-ink/10"
 				}`}
 				onClick={toggleSidebarCollapsed}
 				aria-label={sidebarCollapsed ? t("sidebar.expand") : t("sidebar.collapse")}
@@ -429,7 +438,7 @@ export function SessionTabBar() {
 			<UpdateButton />
 			<button
 				type="button"
-				className="no-drag shrink-0 rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-hover hover:text-ink"
+				className="no-drag shrink-0 rounded-lg p-1.5 text-ink-dim transition-colors hover:bg-ink/10 hover:text-ink"
 				onClick={() => {
 					// 单例 draft：从真实会话进入时按当前会话项目/模型等配置起步；
 					// 已经在 draft 页再次点击则原样保留，并聚焦输入框
@@ -445,7 +454,7 @@ export function SessionTabBar() {
 			<button
 				type="button"
 				className={`no-drag relative shrink-0 rounded-lg p-1.5 transition-colors ${
-					diffSidebarOpen ? "bg-hover text-ink" : "text-ink-dim hover:bg-hover hover:text-ink"
+					diffSidebarOpen ? "bg-hover text-ink" : "text-ink-dim hover:bg-ink/10 hover:text-ink"
 				}`}
 				onClick={toggleDiffSidebar}
 				aria-label={t("diff.toggle")}

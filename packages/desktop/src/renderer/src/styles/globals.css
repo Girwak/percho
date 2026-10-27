@@ -724,6 +724,13 @@ body {
 		outline: 2px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
 		outline-offset: 1px;
 	}
+	/* 恢复可点击元素的手型光标：Tailwind v4 preflight 把 button 默认 cursor 改回了 default。
+	   禁用态保持 default（不可点的暗示）；summary（details 折叠头）同语义。 */
+	button:not(:disabled),
+	[role="button"]:not(:disabled),
+	summary:not(:disabled) {
+		cursor: pointer;
+	}
 }
 
 /* 主题就绪（data-theme 写入）前 body 透明：透出窗口 backgroundColor（main 已按主题设置），
@@ -748,6 +755,21 @@ body {
 	position: absolute;
 	inset: 0;
 	background: rgb(var(--color-scrim));
+}
+
+/* 界面过渡动效总闸（html.nofx，设置→外观）：全部过渡/动画收到近零时长——保留事件触发
+   （依赖 transitionend/animationend 的组件不会悬挂），只是不再有可见动效 */
+html.nofx *,
+html.nofx *::before,
+html.nofx *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+}
+/* 弹窗发光开关（html.no-dialog-glow，设置→外观）：暗色下 shadow-dialog 的白色发光投影
+   换成中性深投影；浅色主题本就是深投影，不受此开关影响 */
+html[data-theme="dark"].no-dialog-glow {
+	--shadow-dialog: 0 12px 40px rgba(0, 0, 0, 0.45);
 }
 
 pre,
@@ -1550,6 +1572,31 @@ code {
 	display: flex;
 	flex-direction: column;
 	background: var(--color-canvas);
+}
+
+/* 嵌入模式（设置→外观「变更侧栏嵌入主视图」）：变更视图不再是右侧浮层，而是主视图内的整幅页面
+   （App 在嵌入+展开时挂载本形态实例，浮层实例同时卸载）。宽度交给容器，列表超宽居中限宽 */
+.diff-sidebar-embedded {
+	position: static;
+	inset-block: auto;
+	width: 100%;
+	height: 100%;
+	border-radius: 0;
+	box-shadow: none;
+	opacity: 1;
+	transform: none;
+	pointer-events: auto;
+	transition: none;
+}
+.diff-sidebar-embedded .diff-sidebar-in {
+	margin: 0 auto;
+}
+/* 有效信息宽度与聊天内容列对齐（设置→外观聊天列宽 default 760 / wide 90% 封顶 1600） */
+.diff-sidebar-embedded:not(.diff-wide) .diff-sidebar-in {
+	max-width: 760px;
+}
+.diff-sidebar-embedded.diff-wide .diff-sidebar-in {
+	max-width: min(90%, 1600px);
 }
 .diff-side-head {
 	flex: none;

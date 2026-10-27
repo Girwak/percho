@@ -45,6 +45,20 @@ export interface UiState {
 	background: BackgroundSettings;
 	/** 中央状态动画开关（任务运行时对话区中央显示放大 orb，盖文字层之上 + 半透明遮罩压暗身后文字；与状态行小 orb 解耦；旧版本文件缺省为 false） */
 	centerOrbEnabled: boolean;
+	/** 流式跑马灯尾随（流式预览右对齐追随最新 token）；旧文件缺省 true */
+	streamingMarquee: boolean;
+	/** 会话页推/拉切换过渡（View Transitions）；旧文件缺省 true */
+	pageSlide: boolean;
+	/** 思考状态动画（中央大动画的 rAF 循环 + 状态行小 orb；静态帧仍显示状态色）；旧文件缺省 true */
+	orbAnimation: boolean;
+	/** 界面过渡动效（CSS transition/animation 总闸，html.nofx 规则）；旧文件缺省 true */
+	uiTransitions: boolean;
+	/** 自定义背景图渲染（设置里选的图保留，只是不渲染；省合成开销）；旧文件缺省 true */
+	backgroundImage: boolean;
+	/** 暗色主题弹窗发光（shadow-dialog 白色发光投影）；旧文件缺省 true */
+	dialogGlow: boolean;
+	/** 变更侧栏嵌入主视图：右侧变更视图不再是浮层，而是主视图内的整幅页面（顶栏 diff 按钮开合）；旧文件缺省 false */
+	diffSidebarEmbedded: boolean;
 	/** 置顶会话 id（新置顶在前；只存 app 本地 ui-state.json，不写会话文件、不跨设备同步；已删除的会话 id 由写侧清理） */
 	pinnedSessions: string[];
 	/**

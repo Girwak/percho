@@ -147,6 +147,8 @@ export const SESSION_CHANNELS = {
 	listSlashCommandsForCwd: ch("session:listSlashCommandsForCwd")<{ cwd?: string }, SlashCommandInfo[]>(),
 	/** 改会话名；历史会话走离线写会话文件，`cwd` 用于精确定位文件（见 PiBackend.setSessionName） */
 	setSessionName: ch("session:setName")<{ sessionId: string; name: string; cwd?: string }, void>(),
+	/** AI 重新命名：用会话模型生成 ≤8 字无标点标题并立即生效（仅已打开会话） */
+	regenerateSessionTitle: ch("session:regenerateTitle")<{ sessionId: string }, { name: string }>(),
 	exportSession: ch("session:export")<{ sessionId: string; format: "html" | "jsonl" }, string>(),
 	/** fork：以 ref 定位分支点新建会话 */
 	forkSession: ch("session:fork")<

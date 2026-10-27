@@ -8,11 +8,11 @@ import type { Rect } from "@percho/shared";
  */
 
 /** 没记过 bounds 时的默认尺寸（也是现行为，改动需同步 spec） */
-export const WINDOW_DEFAULT_WIDTH = 1100;
-export const WINDOW_DEFAULT_HEIGHT = 750;
+export const WINDOW_DEFAULT_WIDTH = 1080;
+export const WINDOW_DEFAULT_HEIGHT = 720;
 /** 最小尺寸 = `BrowserWindow` 的 minWidth/minHeight（用户拖不到更小） */
-export const WINDOW_MIN_WIDTH = 640;
-export const WINDOW_MIN_HEIGHT = 480;
+export const WINDOW_MIN_WIDTH = 1080;
+export const WINDOW_MIN_HEIGHT = 720;
 /** 窗口与所选屏幕 workArea 的最小交集：两个方向都不小于它才算「这块屏上还看得见」 */
 export const BOUNDS_MIN_VISIBLE_W = 160;
 export const BOUNDS_MIN_VISIBLE_H = 80;

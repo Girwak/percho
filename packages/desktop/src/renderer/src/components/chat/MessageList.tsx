@@ -356,12 +356,12 @@ export function MessageList() {
 						updateFollowing(true);
 						pinToBottom(window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
 					}}
-					className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-surface/95 px-3 py-1.5 text-ui-12 leading-[calc(1_/_0.75)] text-ink-2 shadow-pop backdrop-blur transition-colors hover:bg-hover"
+					className="absolute right-4 bottom-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface/95 text-ink-2 shadow-pop backdrop-blur transition-colors hover:bg-hover hover:text-ink"
 					aria-label={t("message.scrollToBottom")}
 				>
 					<svg
-						width="13"
-						height="13"
+						width="16"
+						height="16"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
@@ -373,7 +373,6 @@ export function MessageList() {
 						<path d="M12 5v14" />
 						<path d="m19 12-7 7-7-7" />
 					</svg>
-					{t("message.scrollToBottom")}
 				</button>
 			)}
 		</div>

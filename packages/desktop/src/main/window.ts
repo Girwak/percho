@@ -114,10 +114,10 @@ export function applyChromeTheme(mode: ThemeMode): void {
 
 export function createWindow(theme: "dark" | "light" = "light", bounds: Rect | null = null): BrowserWindow {
 	const window = new BrowserWindow({
-		// 有持久化 bounds 就用它（已过 `sanitizeWindowBounds` 屏幕校验），否则走默认尺寸 + 系统摆放
-		...(bounds
-			? { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }
-			: { width: WINDOW_DEFAULT_WIDTH, height: WINDOW_DEFAULT_HEIGHT }),
+		// 尺寸固定 = 默认值（启动永远 1080×720）；持久化 bounds 只恢复位置（产品决策：不记尺寸）
+		...(bounds ? { x: bounds.x, y: bounds.y } : {}),
+		width: WINDOW_DEFAULT_WIDTH,
+		height: WINDOW_DEFAULT_HEIGHT,
 		minWidth: WINDOW_MIN_WIDTH,
 		minHeight: WINDOW_MIN_HEIGHT,
 		show: false,

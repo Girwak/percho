@@ -35,6 +35,9 @@ export function registerSessionsIpc(backend: PiBackend): void {
 		listSlashCommands: ({ sessionId }) => backend.listSlashCommands(sessionId),
 		listSlashCommandsForCwd: ({ cwd }) => backend.listSlashCommandsForCwd(cwd),
 		setSessionName: ({ sessionId, name, cwd }) => backend.setSessionName(sessionId, name, cwd),
+		regenerateSessionTitle: async ({ sessionId }) => ({
+			name: await backend.regenerateSessionTitle(sessionId),
+		}),
 		exportSession: ({ sessionId, format }) => backend.exportSession(sessionId, format),
 		forkSession: ({ sessionId, ref }) => backend.forkSession(sessionId, ref),
 		recallMessage: ({ sessionId, ref }) => backend.recallMessage(sessionId, ref),

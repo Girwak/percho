@@ -301,6 +301,7 @@ export const en: Messages = {
 	},
 	sessionMenu: {
 		copyDiagnostics: "Copy diagnostics",
+		aiRename: "Rename with AI",
 		archive: "Archive session",
 		delete: "Delete session",
 		deleteTitle: "Delete this session?",
@@ -355,8 +356,7 @@ export const en: Messages = {
 		},
 		language: "Language",
 		languageHint: "Follows system language by default",
-		appearance: {
-				},
+		appearance: {},
 		theme: "Theme",
 		themeHint: "Dark mode is easier on the eyes at night; System follows your OS setting",
 
@@ -365,7 +365,8 @@ export const en: Messages = {
 		fontSizeUi: "UI font size",
 		fontSizeCode: "Code font size",
 		chatWidth: "Chat content width",
-		chatWidthHint: "Column width of the conversation area; Wide uses 90% of the viewport (capped at 1600px) for large displays",
+		chatWidthHint:
+			"Column width of the conversation area; Wide uses 90% of the viewport (capped at 1600px) for large displays",
 		chatWidthDefault: "Default",
 		chatWidthWide: "Wide",
 		fontSizePreset12: "Small",
@@ -403,6 +404,18 @@ export const en: Messages = {
 		centerOrb: "Centered status animation",
 		centerOrbHint:
 			"While a task is running, shows an enlarged status animation at the center of the conversation area (above the text, with a translucent scrim dimming whatever is behind it). Only controls the centered animation — the small orb before the Working/Thinking row always stays.",
+		visualEffects: "Visual effects",
+		visualEffectsHint:
+			"Turn individual effects off to keep the app responsive on low-end hardware. The custom background image setting is kept — only rendering is paused.",
+		fxMarquee: "Streaming marquee",
+		fxPageSlide: "Session slide transitions",
+		fxOrbAnimation: "Status orb animations",
+		fxUiTransitions: "Interface transitions",
+		fxBackgroundImage: "Custom background image",
+		fxDialogGlow: "Dialog glow (dark theme)",
+		diffSidebarEmbedded: "Embed change sidebar in main view",
+		diffSidebarEmbeddedHint:
+			"The change view opens as a full page inside the main view instead of a floating right panel. The top-bar diff button acts as its tab; chat state is kept alive, so switching back loses nothing. Works even when top-bar session pills are hidden.",
 		lan: {
 			title: "Cross-device",
 			hint: "View live agent progress from your phone on a trusted local network. Off by default; the access token rotates every time it is enabled.",
@@ -512,7 +525,8 @@ export const en: Messages = {
 			retention30: "30 days",
 			retention90: "90 days",
 			retentionNever: "Never",
-			retentionHint: "Archived sessions older than the retention period are deleted while the app runs; \u201cNever\u201d keeps them until deleted manually.",
+			retentionHint:
+				"Archived sessions older than the retention period are deleted while the app runs; \u201cNever\u201d keeps them until deleted manually.",
 			purgeNow: "Clean up expired",
 			loading: "Loading\u2026",
 			empty: "No archived sessions",
@@ -755,6 +769,8 @@ export const en: Messages = {
 		thinkingSwitchFailed: "Failed to switch thinking level",
 		mcpLoadFailed: "Failed to read MCP config",
 		sessionRenameFailed: "Failed to rename session",
+		sessionAiRenamed: "Title generated",
+		sessionAiRenameFailed: "AI rename failed — try again",
 		sessionArchiveFailed: "Failed to archive session",
 		sessionUnarchiveFailed: "Failed to restore session",
 		archiveDeleteFailed: "Failed to delete archived session",

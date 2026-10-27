@@ -35,6 +35,11 @@ protocol.registerSchemesAsPrivileged([
 
 // Windows/Linux 不显示默认应用菜单（File/Edit/...）；macOS 菜单在系统菜单栏且承担复制粘贴等快捷键，保留
 if (process.platform !== "darwin") Menu.setApplicationMenu(null);
+// 关闭 Chromium 默认开启、桌面端用不到的后台服务（降闲置 CPU/网络开销）：
+// MediaRouter=投屏媒体路由轮询；Translate=翻译；component-update/background-networking=组件与后台联网
+app.commandLine.appendSwitch("disable-features", "MediaRouter,Translate,TranslateUI");
+app.commandLine.appendSwitch("disable-component-update");
+app.commandLine.appendSwitch("disable-background-networking");
 // 系统深浅色变化（或用户切换主题导致 themeSource 变更）→ 同步窗口底色与 Windows 窗口按钮覆盖层
 nativeTheme.on("updated", () => applyChromeTheme(nativeTheme.themeSource));
 

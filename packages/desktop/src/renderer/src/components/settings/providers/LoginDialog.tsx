@@ -39,7 +39,7 @@ export function LoginDialog() {
 	// （mask）。mask 会把它内部画的东西全裁在容器盒里 —— 不 portal 的话这个 `fixed inset-0` 蒙层
 	// 只盖住右列（顶栏/左导航不暗），弹窗卡片左半边也会被裁掉（实测踩过，见 docs/PITFALLS.md）。
 	return createPortal(
-		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/20" role="dialog" aria-modal>
+		<div className="fixed inset-0 z-[60] flex items-center justify-center" role="dialog" aria-modal>
 			<div className="w-[440px] rounded-xl bg-surface p-4 shadow-dialog">
 				<h3 className="text-ui-14 leading-[calc(1.25_/_0.875)] font-semibold text-ink">
 					{t(login.loginKind === "apiKey" ? "settings.login.apiKeyTitle" : "settings.login.title", {
