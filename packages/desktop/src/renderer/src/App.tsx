@@ -158,7 +158,7 @@ export default function App() {
 								)}
 							</div>
 							{diffPage && (
-								<div className="min-h-0 flex-1 overflow-y-auto">
+								<div className="absolute inset-0">
 									<DiffSidebar embedded />
 								</div>
 							)}
