@@ -30,8 +30,6 @@ interface UiPreferencesStore {
 	backgroundImage: boolean;
 	/** 暗色主题弹窗发光（shadow-dialog 白色发光投影）；默认开 */
 	dialogGlow: boolean;
-	/** 侧栏嵌入主视图（整幅导航页形态，顶栏左栏按钮开合，选中会话自动回聊天）；默认关 */
-	sidebarEmbedded: boolean;
 	/** 置顶会话（id，新置顶在前）：**v8 起就是顶栏胶囊的内容**（左栏只靠图钉标记，不改顺序） */
 	pinnedSessions: string[];
 	/** 按会话记住的权限模式（只存非 default；见 spec/permission-mode.md D7） */
@@ -74,9 +72,6 @@ interface UiPreferencesStore {
 	setUiTransitions: (enabled: boolean) => void;
 	setBackgroundImage: (enabled: boolean) => void;
 	setDialogGlow: (enabled: boolean) => void;
-	setSidebarEmbedded: (enabled: boolean) => void;
-	/** 收起侧栏（嵌入模式下 = 关闭主视图导航页；侧栏模式下 = 折叠左栏）。App 在会话激活后调用以自动回聊天 */
-	collapseSidebar: () => void;
 	/** 置顶 / 取消置顶（新置顶排最左） */
 	togglePin: (sessionId: string) => void;
 	setBarSessionsVisible: (visible: boolean) => void;
@@ -130,7 +125,6 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 	uiTransitions: true,
 	backgroundImage: true,
 	dialogGlow: true,
-	sidebarEmbedded: false,
 	pinnedSessions: [],
 	sessionPermissionModes: {},
 	barSessionsVisible: true,
@@ -163,7 +157,6 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 			uiTransitions: saved?.uiTransitions ?? true,
 			backgroundImage: saved?.backgroundImage ?? true,
 			dialogGlow: saved?.dialogGlow ?? true,
-			sidebarEmbedded: saved?.sidebarEmbedded === true,
 			pinnedSessions: saved?.pinnedSessions ?? [],
 			sessionPermissionModes: saved?.sessionPermissionModes ?? {},
 			barSessionsVisible: saved?.barSessionsVisible ?? true,
@@ -215,17 +208,6 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 	setDialogGlow: (enabled) => {
 		set({ dialogGlow: enabled });
 		persistPatch({ dialogGlow: enabled });
-	},
-
-	setSidebarEmbedded: (enabled) => {
-		set({ sidebarEmbedded: enabled });
-		persistPatch({ sidebarEmbedded: enabled });
-	},
-
-	collapseSidebar: () => {
-		if (get().sidebarCollapsed) return;
-		set({ sidebarCollapsed: true });
-		persistPatch({ sidebarCollapsed: true });
 	},
 
 	setBarSessionsVisible: (visible) => {

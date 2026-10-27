@@ -94,8 +94,6 @@ function AppearanceBasics() {
 	const setBackgroundImage = useUiPreferencesStore((s) => s.setBackgroundImage);
 	const dialogGlow = useUiPreferencesStore((s) => s.dialogGlow);
 	const setDialogGlow = useUiPreferencesStore((s) => s.setDialogGlow);
-	const sidebarEmbedded = useUiPreferencesStore((s) => s.sidebarEmbedded);
-	const setSidebarEmbedded = useUiPreferencesStore((s) => s.setSidebarEmbedded);
 	const setCenterOrbEnabled = useUiPreferencesStore((s) => s.setCenterOrbEnabled);
 	const uiFontSize = useUiPreferencesStore((s) => s.uiFontSize);
 	const setUiFontSize = useUiPreferencesStore((s) => s.setUiFontSize);
@@ -226,15 +224,6 @@ function AppearanceBasics() {
 					<Switch checked={sessionRailEnabled} onCheckedChange={setSessionRailEnabled} />
 				</div>
 				<p className="mt-0.5 text-ui-11 leading-relaxed text-ink-faint">{t("settings.sessionRailHint")}</p>
-			</div>
-			<div>
-				<div className="flex items-center justify-between gap-4">
-					<h3 className="text-ui-13 font-medium text-ink">{t("settings.sidebarEmbedded")}</h3>
-					<Switch checked={sidebarEmbedded} onCheckedChange={setSidebarEmbedded} />
-				</div>
-				<p className="mt-0.5 text-ui-11 leading-relaxed text-ink-faint">
-					{t("settings.sidebarEmbeddedHint")}
-				</p>
 			</div>
 			<div>
 				<div className="flex items-center justify-between gap-4">

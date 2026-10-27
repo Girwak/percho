@@ -25,7 +25,7 @@ import { useSidebarRenderWidth } from "./useSidebarRenderWidth";
  * （容器宽不够时二次夹紧），写成 `--sidebar-render-width` 由 `.sidebar` 与 `.sidebar-inner` **共用**——
  * 内外层不同值的话，窄窗下内层右侧会被 overflow:hidden 硬裁掉功能控件（见 lib/sidebar-width.ts）。
  */
-export function Sidebar({ embedded = false }: { embedded?: boolean }) {
+export function Sidebar() {
 	const t = useT();
 	const collapsed = useUiPreferencesStore((s) => s.sidebarCollapsed);
 	const sidebarWidth = useUiPreferencesStore((s) => s.sidebarWidth);
@@ -86,13 +86,13 @@ export function Sidebar({ embedded = false }: { embedded?: boolean }) {
 	return (
 		<aside
 			ref={asideRef}
-			className={`sidebar ${embedded ? "sidebar-embedded" : "fade-rule-v"} ${collapsed ? "is-collapsed" : ""} ${resizing ? "is-resizing" : ""}`}
-			style={embedded ? undefined : ({ "--sidebar-render-width": `${renderWidth}px` } as CSSProperties)}
+			className={`sidebar fade-rule-v ${collapsed ? "is-collapsed" : ""} ${resizing ? "is-resizing" : ""}`}
+			style={{ "--sidebar-render-width": `${renderWidth}px` } as CSSProperties}
 			aria-label={t("sidebar.title")}
 			inert={collapsed}
 		>
-			{/* 折叠态不渲染把手：宽度已归 0，它会被裁看不见，还会多一个 Tab 序；嵌入态宽度由容器决定，无把手 */}
-			{!collapsed && !embedded && <SidebarResizeHandle value={renderWidth} onResizingChange={setResizing} />}
+			{/* 折叠态不渲染把手：宽度已归 0，它会被裁看不见，还会多一个 Tab 序 */}
+			{!collapsed && <SidebarResizeHandle value={renderWidth} onResizingChange={setResizing} />}
 			<div className="sidebar-inner">
 				<SidebarHeader />
 				{/* 左栏唯一的外层滚动容器：验收脚本用 `data-sidebar-scroll-root` 定位它（纯属性，无视觉影响） */}
