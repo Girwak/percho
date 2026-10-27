@@ -298,6 +298,7 @@ export const zh = {
 	},
 	sessionMenu: {
 		copyDiagnostics: "复制诊断信息",
+		aiRename: "AI 重新命名",
 		archive: "归档会话",
 		delete: "删除会话",
 		deleteTitle: "删除会话？",
@@ -744,6 +745,8 @@ export const zh = {
 		thinkingSwitchFailed: "切换思考深度失败",
 		mcpLoadFailed: "MCP 配置读取失败",
 		sessionRenameFailed: "重命名失败",
+		sessionAiRenamed: "已生成新标题",
+		sessionAiRenameFailed: "AI 重命名失败，请重试",
 		sessionArchiveFailed: "归档失败",
 		sessionUnarchiveFailed: "恢复失败",
 		archiveDeleteFailed: "删除归档会话失败",

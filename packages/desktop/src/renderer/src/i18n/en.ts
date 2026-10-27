@@ -301,6 +301,7 @@ export const en: Messages = {
 	},
 	sessionMenu: {
 		copyDiagnostics: "Copy diagnostics",
+		aiRename: "Rename with AI",
 		archive: "Archive session",
 		delete: "Delete session",
 		deleteTitle: "Delete this session?",
@@ -768,6 +769,8 @@ export const en: Messages = {
 		thinkingSwitchFailed: "Failed to switch thinking level",
 		mcpLoadFailed: "Failed to read MCP config",
 		sessionRenameFailed: "Failed to rename session",
+		sessionAiRenamed: "Title generated",
+		sessionAiRenameFailed: "AI rename failed — try again",
 		sessionArchiveFailed: "Failed to archive session",
 		sessionUnarchiveFailed: "Failed to restore session",
 		archiveDeleteFailed: "Failed to delete archived session",

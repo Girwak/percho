@@ -6,7 +6,7 @@ import { useProjectsStore } from "../../stores/projects";
 import { useSessionsStore } from "../../stores/sessions";
 import { useToastsStore } from "../../stores/toasts";
 import { useUiPreferencesStore } from "../../stores/ui-preferences";
-import { ArchiveIcon, CopyIcon, PencilIcon, PinIcon, TrashIcon } from "../icons";
+import { ArchiveIcon, CopyIcon, PencilIcon, PinIcon, RefreshIcon, TrashIcon } from "../icons";
 import type { ContextMenuItem } from "../ui/ContextMenu";
 
 /**
@@ -96,14 +96,32 @@ export function archiveSession(session: SessionMeta): void {
 		});
 }
 
-/** 菜单项：重命名 / 置顶 / 复制诊断 / 归档 / 删除会话（调用方保证会话可写，见 canOpenSessionMenu）。
- *  后三项只在调用方传了处理器时出现（顶栏胶囊菜单给重命名/置顶/归档），删除走分隔线分组 + 危险红。 */
+/** AI 重新命名：后端用会话模型把首条用户消息概括为 ≤8 字无标点标题并立即生效。
+ *  仅对已打开的会话可用（需要内存消息与会话模型；未打开由调用方不给菜单项）。 */
+export function aiRenameSession(sessionId: string): void {
+	getPi()
+		.regenerateSessionTitle({ sessionId })
+		.then(({ name }) => {
+			useSessionsStore.getState().updateSessionName(sessionId, name);
+			useProjectsStore.getState().applySessionName(sessionId, name);
+			useToastsStore.getState().push("info", "toast.sessionAiRenamed");
+		})
+		.catch((error) => {
+			console.error("AI 重命名失败", error);
+			useToastsStore.getState().push("error", "toast.sessionAiRenameFailed");
+		});
+}
+
+/** 菜单项：重命名 / AI 重新命名 / 置顶 / 复制诊断 / 归档 / 删除会话（调用方保证会话可写，见 canOpenSessionMenu）。
+ *  后三项只在调用方传了处理器时出现（顶栏胶囊菜单给重命名/置顶/归档），删除走分隔线分组 + 危险红。
+ *  onAiRename 由调用方按「会话是否已打开」决定是否传入（未打开的会话没有内存消息与会话模型）。 */
 export function sessionMenuItems(
 	t: Translate,
 	options: {
 		sessionId: string;
 		pinned: boolean;
 		onRename: () => void;
+		onAiRename?: () => void;
 		onCopyDiagnostics?: () => void;
 		onArchive?: () => void;
 		onDelete?: () => void;
@@ -111,6 +129,16 @@ export function sessionMenuItems(
 ): ContextMenuItem[] {
 	return [
 		{ key: "rename", label: t("tabbar.rename"), icon: <PencilIcon size={13} />, onSelect: options.onRename },
+		...(options.onAiRename
+			? [
+					{
+						key: "ai-rename",
+						label: t("sessionMenu.aiRename"),
+						icon: <RefreshIcon size={13} />,
+						onSelect: options.onAiRename,
+					} satisfies ContextMenuItem,
+				]
+			: []),
 		{
 			key: "pin",
 			label: options.pinned ? t("tabbar.unpin") : t("tabbar.pin"),

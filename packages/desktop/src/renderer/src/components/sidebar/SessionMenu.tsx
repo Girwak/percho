@@ -2,9 +2,11 @@ import type { SessionMeta } from "@percho/shared";
 import { useState } from "react";
 import { useT } from "../../i18n";
 import { useProjectsStore } from "../../stores/projects";
+import { useSessionsStore } from "../../stores/sessions";
 import { useUiPreferencesStore } from "../../stores/ui-preferences";
 import { RenamePopover } from "../session/RenamePopover";
 import {
+	aiRenameSession,
 	archiveSession,
 	copySessionDiagnostics,
 	renameSession,
@@ -27,6 +29,7 @@ export function useSessionMenu() {
 	const [menu, setMenu] = useState<{ session: SessionMeta; anchor: MenuAnchor } | null>(null);
 	const [renaming, setRenaming] = useState<{ session: SessionMeta; anchor: MenuAnchor } | null>(null);
 	const [deleting, setDeleting] = useState<SessionMeta | null>(null);
+	const sessionsLoaded = useSessionsStore((s) => s.sessions);
 
 	const open = (session: SessionMeta, anchor: MenuAnchor) => {
 		// 只读子会话 / 找不到会话的判定在纯函数里（sidebarMenuKind，有单测）；none 就不弹菜单
@@ -44,6 +47,10 @@ export function useSessionMenu() {
 						sessionId: menu.session.sessionId,
 						pinned: pinnedSessions.includes(menu.session.sessionId),
 						onRename: () => setRenaming({ session: menu.session, anchor: menu.anchor }),
+						// AI 重新命名需要内存消息与会话模型：仅已打开的会话提供
+						onAiRename: sessionsLoaded.some((s) => s.sessionId === menu.session.sessionId)
+							? () => aiRenameSession(menu.session.sessionId)
+							: undefined,
 						onCopyDiagnostics: () => void copySessionDiagnostics(menu.session),
 						onArchive: () => void archiveSession(menu.session),
 						onDelete: () => setDeleting(menu.session),
