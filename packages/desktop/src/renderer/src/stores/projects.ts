@@ -189,6 +189,17 @@ export const useProjectsStore = create<ProjectsStore>((set, get) => {
 			// 与删除同一条残留清理链：会话已不在目录里，置顶/权限记忆/成员表/返回链/订阅都必须带走
 			forgetSessionSideEffects(session.sessionId);
 			await closeSessionIfLoaded(session.sessionId);
+			const remaining = get().allSessions.filter((s) => s.sessionId !== session.sessionId);
+			// 归档 ≠ 工程消失：目录里最后一个会话被归档时，把工程收进 addedProjects（持久化），
+			// 否则工程会整体退出侧栏，新建会话还得重新添加目录。删除路径不保留——那是真没了。
+			if (session.cwd && !isDailyCwd(session.cwd) && !remaining.some((s) => s.cwd === session.cwd)) {
+				const added = get().addedProjects;
+				if (!added.includes(session.cwd)) {
+					const next = [...added, session.cwd];
+					localStorage.setItem(ADDED_KEY, JSON.stringify(next));
+					set({ addedProjects: next });
+				}
+			}
 			set((state) => ({
 				allSessions: state.allSessions.filter((s) => s.sessionId !== session.sessionId),
 			}));
