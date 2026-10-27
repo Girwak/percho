@@ -58,7 +58,7 @@ export function ConfirmDialog({
 
 	return createPortal(
 		// 蒙层用 bg-ink/6（比设置弹窗的 bg-ink/20 淡得多）：只提示「后面不可点」，不暗掉整个界面
-		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/6" role="presentation">
+		<div className="fixed inset-0 z-[60] flex items-center justify-center" role="presentation">
 			<div
 				ref={ref}
 				role="dialog"

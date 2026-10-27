@@ -50,7 +50,7 @@ export function UpdateButton() {
 			<button
 				type="button"
 				aria-label={label}
-				className="no-drag relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink transition-colors hover:bg-hover"
+				className="no-drag relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/10"
 				onClick={() => {
 					if (state.phase !== "available") return;
 					if (state.manual) void openReleasePage(state.version);
