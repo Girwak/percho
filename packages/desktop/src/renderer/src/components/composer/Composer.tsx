@@ -5,8 +5,6 @@ import { useActiveModelInfo, useSessionReadOnly } from "../../hooks/use-session-
 import { useT } from "../../i18n";
 import { selectActiveCwd } from "../../lib/active-cwd";
 import { prepareImageAttachment } from "../../lib/image-attachment";
-import { RegionHost } from "../../plugins/RegionHost";
-import { UI_REGIONS } from "../../plugins/slots";
 import { COMPOSER_FOCUS_EVENT, EMPTY_DRAFT, NEW_SESSION_DRAFT_KEY, useDraftStore } from "../../stores/drafts";
 import { useSessionsStore } from "../../stores/sessions";
 import { pushToast } from "../../stores/toasts";
@@ -469,7 +467,6 @@ export function Composer({ centered = false }: { centered?: boolean }) {
 						</div>
 						<div className="flex-1" />
 						<ContextRing />
-						<RegionHost region={UI_REGIONS.ComposerFooter} />
 						<div className={readOnly ? "pointer-events-none opacity-40" : undefined}>
 							<ModelPicker />
 						</div>

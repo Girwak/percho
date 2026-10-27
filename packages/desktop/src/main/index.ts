@@ -9,7 +9,6 @@ import { backgroundsDir } from "./background";
 import { registerIpc } from "./ipc";
 import { initLanObserver, type LanObserverHandle } from "./lan";
 import { attachRendererWatchdog } from "./renderer-watchdog";
-import { UiPluginManager, uiPluginsResourcesDir } from "./ui-plugins/manager";
 import { loadUiState } from "./ui-state";
 import { initUpdater, scheduleAutoUpdateCheck } from "./updater";
 import { applyChromeTheme, createWindow, markQuitting, resolveTheme } from "./window";
@@ -17,19 +16,15 @@ import { sanitizeWindowBounds } from "./window-bounds";
 
 const log = createLogger("main");
 let backend: PiBackend;
-let uiPluginsManager: UiPluginManager;
-let lanObserver: LanObserverHandle | undefined;
-
 /**
  * 追加进每次会话系统提示词的桌面端段落（每次调用都付费，保持精简）。
- * 让 agent 知道自己跑在 Percho 桌面端、界面可被 UI 插件定制、以及定制流程与信任门。
+ * 让 agent 知道自己跑在 Percho 桌面端。
  */
-const UI_PLUGIN_PROMPT: string[] = [
+const DESKTOP_PROMPT: string[] = [
 	"你运行在 Percho 桌面端（Electron 图形界面），用户通过图形聊天界面与你交互，不是 CLI 终端。",
-	"Percho 的界面可以用 UI 插件定制：当前可替换「工具调用卡 / 子代理卡 / 任务列表面板」三处组件。",
-	"用户想改界面、或问「界面能改什么」时：读 ~/.percho/ui-plugins/SPEC.md（示例在 _examples/ 目录），按规范写一个插件，保存即自动热重载。",
-	"写完引导用户去「设置 → UI 插件」打开总开关并启用（信任门：agent 不能代劳）。",
 ];
+
+let lanObserver: LanObserverHandle | undefined;
 
 /** renderer 加载自定义背景图的协议（pi-bg://background/<文件名>，只读 userData/backgrounds/） */
 const BG_PROTOCOL = "pi-bg";
@@ -60,10 +55,9 @@ app.whenReady().then(async () => {
 		openExternal: (url) => shell.openExternal(url),
 		archiveSweeper: true,
 		desktopIntegration: {
-			appendSystemPrompt: UI_PLUGIN_PROMPT,
+			appendSystemPrompt: DESKTOP_PROMPT,
+			// 内置协作 skill（channel-pickup/design-handoff）：随包分发的独立技能目录
 			additionalSkillPaths: [
-				join(uiPluginsResourcesDir(), "skills"),
-				// 内置协作 skill（channel-pickup/design-handoff）：语义上与 UI 插件无关，独立目录分发
 				app.isPackaged ? join(process.resourcesPath, "skills") : join(__dirname, "../../resources/skills"),
 			],
 		},
@@ -76,9 +70,7 @@ app.whenReady().then(async () => {
 		join(app.getPath("userData"), "lan-observer.json"),
 		join(app.getPath("userData"), "lan-audit.jsonl"),
 	);
-	uiPluginsManager = new UiPluginManager();
-	await uiPluginsManager.init();
-	registerIpc(backend, uiPluginsManager, lanObserver);
+	registerIpc(backend, lanObserver);
 	await initUpdater();
 	scheduleAutoUpdateCheck();
 	const uiState = await loadUiState();
@@ -114,5 +106,4 @@ app.on("before-quit", () => {
 	markQuitting();
 	void lanObserver?.stop();
 	backend?.dispose();
-	uiPluginsManager?.disposeWatcher();
 });

@@ -17,10 +17,6 @@ import { Toaster } from "./components/Toaster";
 import { useSessionEventBridge } from "./hooks/use-session-event-bridge";
 import { initDailyDir } from "./lib/daily";
 import { useSessionGc } from "./lib/use-session-gc";
-import { initUiPlugins } from "./plugins/loader";
-import { RegionHost } from "./plugins/RegionHost";
-import { Slot } from "./plugins/Slot";
-import { UI_REGIONS, UI_SLOTS } from "./plugins/slots";
 import { finishSplash } from "./splash";
 import { initAppQuit } from "./stores/app-quit";
 import {
@@ -94,8 +90,6 @@ export default function App() {
 		initAppQuit();
 		// 日常空间目录缓存（pill/轨道/侧栏的空间归属判定依赖；失败静默，入口退化为不显示）
 		void initDailyDir();
-		// UI 插件加载链路（总开关关时只订阅事件，零开销）
-		void initUiPlugins();
 	}, []);
 
 	const respondTrust = (requestId: string, optionIndex: number) => {
@@ -114,8 +108,7 @@ export default function App() {
 					<div className="app-bg-scrim" style={{ opacity: bgDim }} />
 				</>
 			)}
-			{/* 背景贡献层：与自定义背景图同层同规则（z-0，界面默认不透明时不可见），内容列（z-10）之前 */}
-			<RegionHost region={UI_REGIONS.AppBackground} />
+			{/* 背景层（自定义背景图同层规则：z-0，界面默认不透明时不可见），内容列（z-10）之前 */}
 			<div className="relative z-10 flex h-full flex-col">
 				{/* 顶栏常驻（v9）：它承担窗口拖动 / 左栏开合 / 变更侧栏入口，不再整条隐藏；
 				   设置里的开关只控制「是否显示置顶会话胶囊」（见 SessionTabBar） */}
@@ -135,28 +128,25 @@ export default function App() {
 						{/* 右侧 DiffSidebar 是独立浮层，不参与中间聊天列宽度与布局动画。 */}
 						<main className="relative min-h-0 flex-1">
 							{showEmpty ? <EmptyState /> : <MessageList />}
-							{/* Todo 槽位宿主：display:contents 不产生盒子（插件/默认 Todo 的原绝对定位不受影响），
+							{/* Todo 面板宿主：display:contents 不产生盒子（Todo 的原绝对定位不受影响），
 							    只给 CornerStack 一个可 observe 的挂载点（它去测量渲染根的实际底边） */}
 							<div ref={todoSlotHostRef} style={{ display: "contents" }}>
-								<Slot name={UI_SLOTS.TodoPanel} props={{}} fallback={TodoPanel} />
+								<TodoPanel />
 							</div>
 							{/* 右上角：频道胶囊 + top-right 贡献共用一个堆叠（CornerStack），一起避开 Todo 实际底边；
 							    top-left 用 leading 插返回父会话入口，与左上区域贡献共用同一定位容器 */}
 							<CornerStack slotHostRef={todoSlotHostRef} />
-							<RegionHost
-								region={UI_REGIONS.CornerTopLeft}
-								leading={hasParentRelation ? <SubagentBackButton /> : undefined}
-							/>
-							<RegionHost region={UI_REGIONS.CornerBottomLeft} />
-							<RegionHost region={UI_REGIONS.CornerBottomRight} />
+							{hasParentRelation && (
+								<div className="pointer-events-none absolute z-20 flex flex-col gap-2 top-2 left-4">
+									<SubagentBackButton />
+								</div>
+							)}
 						</main>
 						<DockSlot sessionId={activeSessionId} hideComposer={showEmpty} />
 					</div>
 					<DiffSidebar />
 				</div>
 			</div>
-			{/* 悬浮贡献层：内容列之后、设置弹窗之前（z-20 < z-40，插件层永在弹窗之下） */}
-			<RegionHost region={UI_REGIONS.AppOverlay} />
 			<SettingsDialog />
 			<TrustDialog requests={trustRequests} onRespond={respondTrust} />
 			<Toaster />

@@ -1,15 +1,13 @@
 import { memo, useState } from "react";
 import { useT } from "../../i18n";
-import { Slot } from "../../plugins/Slot";
-import { UI_SLOTS } from "../../plugins/slots";
 import type { UIMessage } from "../../stores/transcript";
+import { SubagentRunCard } from "./SubagentRunCard";
 import { AssistantMessage } from "./AssistantMessage";
 import { ErrorNote } from "./ErrorNote";
 import { HistoryImage } from "./history-image/HistoryImage";
 import { modeForImageCount } from "./history-image-layout";
 import { ImagePreviewOverlay } from "./ImagePreview";
 import { CopyButton, ForkButton } from "./message-actions";
-import { SubagentRunCard } from "./SubagentRunCard";
 import { SystemMessage } from "./SystemMessage";
 import { UserMessage } from "./UserMessage";
 
@@ -71,7 +69,7 @@ export const MessageItem = memo(function MessageItem({
 	}
 
 	if (message.kind === "subagent") {
-		return <Slot name={UI_SLOTS.SubagentCard} props={{ runs: message.runs }} fallback={SubagentRunCard} />;
+		return <SubagentRunCard runs={message.runs} />;
 	}
 
 	if (message.kind === "error") {

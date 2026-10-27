@@ -18,6 +18,5 @@ export * from "./thinking";
 export * from "./todo";
 export * from "./transcript";
 export * from "./typography";
-export * from "./ui-plugins";
 export * from "./update";
 export * from "./update-diagnostics";

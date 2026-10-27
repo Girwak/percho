@@ -1,11 +1,15 @@
-import { type ChatColumnWidthMode, CODE_FONT_SIZE_PRESETS, formatFontSize, type ThemeMode, UI_FONT_SIZE_PRESETS } from "@percho/shared";
-import { useState } from "react";
+import {
+	type ChatColumnWidthMode,
+	CODE_FONT_SIZE_PRESETS,
+	formatFontSize,
+	type ThemeMode,
+	UI_FONT_SIZE_PRESETS,
+} from "@percho/shared";
 import { useT } from "../../i18n";
 import { backgroundImageUrl, useThemeStore } from "../../stores/theme";
 import { useUiPreferencesStore } from "../../stores/ui-preferences";
 import { Switch } from "../ui/Switch";
 import { Tooltip } from "../ui/Tooltip";
-import { UiPluginsSection } from "./UiPluginsSection";
 
 /** 档位名（四个档位通用）：小 / 默认 / 大 / 更大 —— 与档位数组下标一一对应 */
 const PRESET_LABEL_KEYS = [
@@ -63,13 +67,6 @@ const CHAT_WIDTH_LABEL_KEYS = {
 	default: "settings.chatWidthDefault",
 	wide: "settings.chatWidthWide",
 } as const satisfies Record<ChatColumnWidthMode, string>;
-
-type AppearanceTab = "basics" | "uiPlugins";
-
-const APPEARANCE_TABS = [
-	{ id: "basics", labelKey: "settings.appearance.tabBasics" },
-	{ id: "uiPlugins", labelKey: "settings.appearance.tabUiPlugins" },
-] as const;
 
 /** 基础子页：主题模式 + 自定义背景图（选图/清除/遮罩浓度）+ 显示顶栏 + 中央动画 */
 function AppearanceBasics() {
@@ -228,33 +225,14 @@ function AppearanceBasics() {
 }
 
 /**
- * 外观面板：顶部 Tab 分栏（设计稿 .local/design/ux/appearance-ui-plugins）
- * 「基础」= 内置外观设置；「UI 插件」= 替换内置组件的插件管理（原独立设置分类并入）。
- * Tab 是面板内临时视图（内存态），每次打开设置默认落在「基础」。
+ * 外观面板：主题模式 + 自定义背景图 + 显示顶栏 + 中央动画 + 字号 + 聊天列宽。
  */
 export function AppearancePanel() {
-	const t = useT();
-	const [tab, setTab] = useState<AppearanceTab>("basics");
-
 	return (
 		<div>
-			<div className="flex gap-5 border-b border-border px-0.5 pt-0.5">
-				{APPEARANCE_TABS.map((tabDef) => (
-					<button
-						key={tabDef.id}
-						type="button"
-						className={`relative -mb-px border-b-2 px-0.5 pb-[9px] pt-[5px] text-ui-13 transition-colors ${
-							tab === tabDef.id
-								? "border-ink font-medium text-ink"
-								: "border-transparent text-ink-faint hover:text-ink-2"
-						}`}
-						onClick={() => setTab(tabDef.id)}
-					>
-						{t(tabDef.labelKey)}
-					</button>
-				))}
+			<div className="pt-5">
+				<AppearanceBasics />
 			</div>
-			<div className="pt-5">{tab === "basics" ? <AppearanceBasics /> : <UiPluginsSection />}</div>
 		</div>
 	);
 }

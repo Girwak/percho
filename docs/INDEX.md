@@ -41,7 +41,6 @@
 | 扩展选择题、输入、确认、通知 | backend `session/ui-context.ts`、`extension-dialog-host.ts`；renderer `components/session/InteractionDock.tsx` |
 | 内置 ask_user_question 问卷（同名第三方插件自动被遮蔽） | backend `tools/ask-user-question.ts`；renderer `components/session/AskUserDock.tsx`；仲裁见 `DockSlot.tsx` |
 | 设置页及按域加载 | renderer `components/settings/`、`stores/settings.ts`；新增分类入口 `SettingsDialog.tsx` |
-| UI 插件运行时与发布契约 | renderer `plugins/`；desktop `main/ui-plugins/`、`resources/ui-plugins/SPEC.md` |
 | 主题、字号、基础样式、文案 | renderer `styles/`、`stores/theme.ts`、`lib/typography.ts`、`i18n/`；字号档位在 shared `typography.ts` |
 | 窗口、退出、尺寸恢复、开发数据隔离 | desktop `main/window.ts`、`window-bounds.ts`、`dev-agent-dir.ts` |
 | 自动更新和诊断 | desktop `main/updater.ts`、`update-policy.ts`、`update-diagnostics.ts`、`build/update-diagnostics.nsh` |

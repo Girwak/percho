@@ -56,7 +56,6 @@ import type {
 	SubagentInfo,
 } from "./settings";
 import type { TodoItem } from "./todo";
-import type { UiPluginInfo, UiPluginManifest, UiPluginsConfig, UiPluginsEventPayload } from "./ui-plugins";
 import type { UpdateState } from "./update";
 import type { UpdateDiagnosticsInfo } from "./update-diagnostics";
 
@@ -360,28 +359,7 @@ export const APP_CHANNELS = {
 	confirmQuit: ch("app:confirmQuit")<void, void>(),
 } as const;
 
-/** UI 插件域：配置读写 / 列表 / 构建 / 代码读取 / 目录打开（参数校验在 handler 内） */
-export const UI_PLUGINS_CHANNELS = {
-	/** 读 UI 插件全局配置（总开关/启用信任表/槽位指派） */
-	uiPluginsGetConfig: ch("uiPlugins:getConfig")<void, UiPluginsConfig>(),
-	/** 设 UI 插件全局总开关 */
-	uiPluginsSetEnabled: ch("uiPlugins:setEnabled")<{ enabled: boolean }, void>(),
-	/** 列 UI 插件（含 enabled/trusted/buildError/invalidReason） */
-	uiPluginsList: ch("uiPlugins:list")<void, UiPluginInfo[]>(),
-	/** 读插件构建产物（name 必须是扫描到的合法插件名，禁路径） */
-	uiPluginsReadCode: ch("uiPlugins:readCode")<
-		{ name: string },
-		{ manifest: UiPluginManifest; code: string } | { error: string }
-	>(),
-	/** 启用/停用单个插件（启用=信任，同步落盘） */
-	uiPluginsSetPluginEnabled: ch("uiPlugins:setPluginEnabled")<{ name: string; enabled: boolean }, void>(),
-	/** 槽位指派（pluginName=null 取消指派） */
-	uiPluginsAssignSlot: ch("uiPlugins:assignSlot")<{ slot: string; pluginName: string | null }, void>(),
-	/** 重新构建插件（构建失败返回错误信息，旧产物保留） */
-	uiPluginsRebuild: ch("uiPlugins:rebuild")<{ name: string }, { ok: true } | { ok: false; error: string }>(),
-	/** 打开插件目录（不传 name 开根目录；shell.openPath） */
-	uiPluginsOpenDir: ch("uiPlugins:openDir")<{ name?: string }, void>(),
-} as const;
+
 
 /** 已表化通道全集（分批迁移，终态 = 全部 invoke 通道） */
 export const CHANNEL_TABLE = {
@@ -393,7 +371,6 @@ export const CHANNEL_TABLE = {
 	...LAN_CHANNELS,
 	...EXTENSION_DIALOG_CHANNELS,
 	...ASK_USER_CHANNELS,
-	...UI_PLUGINS_CHANNELS,
 } as const;
 
 export type ChannelTable = typeof CHANNEL_TABLE;
@@ -444,7 +421,6 @@ export const SUBSCRIPTION_TABLE = {
 		"ChannelSubscriptionsChanged",
 		"channel:subscriptionsChanged",
 	),
-	onUiPluginsEvent: subscription<UiPluginsEventPayload>()("UiPluginsEvent", "uiPlugins:event"),
 	onQuitRequested: subscription<void>()("QuitRequested", "app:quit-requested", true),
 	onUpdateEvent: subscription<UpdateState>()("UpdateEvent", "update:event"),
 	onEvent: subscription<SessionEventEnvelope>()("Event", "pi:event"),

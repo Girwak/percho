@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
  * - **仅一枚 21px ghost 图标**（验收后由 14px 放大 1.5 倍）：无常驻文案、无胶囊、无原生 title、**无 Tooltip 气泡**
  *   （产品侧要求不出现文字提示）—— 语义只靠 `aria-label`；
  * - 固定方形尺寸 + `self-start`：不被同容器里更宽的插件贡献拉伸；
- * - 挂载点是 `RegionHost(chat.corner.top-left)` 的 `leading` 插槽（与左上区域贡献共容器，互不重叠）；
+ * - 挂载点是 App 左上角的独立定位容器（absolute z-20，原 RegionHost 位置的直渲染）；
  * - 没有关系时**不留占位**（返回空串）。
  *
  * 注：classic JSX + zustand v5 的 SSR 快照取 `getInitialState()` ⇒ 按本仓既有做法用普通 selector 函数喂状态。
