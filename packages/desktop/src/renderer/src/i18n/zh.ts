@@ -405,6 +405,9 @@ export const zh = {
 		fxUiTransitions: "界面过渡动效",
 		fxBackgroundImage: "自定义背景图",
 		fxDialogGlow: "弹窗发光（暗色主题）",
+		diffSidebarEmbedded: "变更侧栏嵌入主视图",
+		diffSidebarEmbeddedHint:
+			"开启后变更视图不再是右侧浮层，而是主视图内的整幅页面：顶栏 diff 按钮即标签入口，聊天内容保活、切回不丢位置。顶栏会话胶囊关闭时，diff 按钮仍在顶栏，入口不受影响。",
 		lan: {
 			title: "跨设备互联",
 			hint: "在可信局域网内，用手机实时查看 agent 的运行进度。默认关闭；每次开启会轮换访问令牌。",

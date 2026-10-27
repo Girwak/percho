@@ -30,6 +30,8 @@ interface UiPreferencesStore {
 	backgroundImage: boolean;
 	/** 暗色主题弹窗发光（shadow-dialog 白色发光投影）；默认开 */
 	dialogGlow: boolean;
+	/** 变更侧栏嵌入主视图：右侧变更视图不再是浮层，而是主视图内的整幅页面（顶栏 diff 按钮开合）；旧文件缺省 false */
+	diffSidebarEmbedded: boolean;
 	/** 置顶会话（id，新置顶在前）：**v8 起就是顶栏胶囊的内容**（左栏只靠图钉标记，不改顺序） */
 	pinnedSessions: string[];
 	/** 按会话记住的权限模式（只存非 default；见 spec/permission-mode.md D7） */
@@ -72,6 +74,7 @@ interface UiPreferencesStore {
 	setUiTransitions: (enabled: boolean) => void;
 	setBackgroundImage: (enabled: boolean) => void;
 	setDialogGlow: (enabled: boolean) => void;
+	setDiffSidebarEmbedded: (enabled: boolean) => void;
 	/** 置顶 / 取消置顶（新置顶排最左） */
 	togglePin: (sessionId: string) => void;
 	setBarSessionsVisible: (visible: boolean) => void;
@@ -125,6 +128,7 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 	uiTransitions: true,
 	backgroundImage: true,
 	dialogGlow: true,
+	diffSidebarEmbedded: false,
 	pinnedSessions: [],
 	sessionPermissionModes: {},
 	barSessionsVisible: true,
@@ -157,6 +161,7 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 			uiTransitions: saved?.uiTransitions ?? true,
 			backgroundImage: saved?.backgroundImage ?? true,
 			dialogGlow: saved?.dialogGlow ?? true,
+			diffSidebarEmbedded: saved?.diffSidebarEmbedded === true,
 			pinnedSessions: saved?.pinnedSessions ?? [],
 			sessionPermissionModes: saved?.sessionPermissionModes ?? {},
 			barSessionsVisible: saved?.barSessionsVisible ?? true,
@@ -208,6 +213,11 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 	setDialogGlow: (enabled) => {
 		set({ dialogGlow: enabled });
 		persistPatch({ dialogGlow: enabled });
+	},
+
+	setDiffSidebarEmbedded: (enabled) => {
+		set({ diffSidebarEmbedded: enabled });
+		persistPatch({ diffSidebarEmbedded: enabled });
 	},
 
 	setBarSessionsVisible: (visible) => {

@@ -1573,6 +1573,25 @@ code {
 	flex-direction: column;
 	background: var(--color-canvas);
 }
+
+/* 嵌入模式（设置→外观「变更侧栏嵌入主视图」）：变更视图不再是右侧浮层，而是主视图内的整幅页面
+   （App 在嵌入+展开时挂载本形态实例，浮层实例同时卸载）。宽度交给容器，列表超宽居中限宽 */
+.diff-sidebar-embedded {
+	position: static;
+	inset-block: auto;
+	width: 100%;
+	height: 100%;
+	border-radius: 0;
+	box-shadow: none;
+	opacity: 1;
+	transform: none;
+	pointer-events: auto;
+	transition: none;
+}
+.diff-sidebar-embedded .diff-sidebar-in {
+	max-width: 860px;
+	margin: 0 auto;
+}
 .diff-side-head {
 	flex: none;
 	display: flex;

@@ -96,9 +96,9 @@ function BranchRow() {
  * chip 跳转 = stores/ui.ts 的 diffFocus → 这里直接操作 DOM（开卡片 + 滚动定位 + 闪烁）。
  * 开关状态内存态不持久化（重启统一关闭，用户已定）。
  */
-export function DiffSidebar() {
+export function DiffSidebar({ embedded = false }: { embedded?: boolean }) {
 	const t = useT();
-	const open = useUiStore((s) => s.diffSidebarOpen);
+	const open = useUiStore((s) => s.diffSidebarOpen) || embedded;
 	const setOpen = useUiStore((s) => s.setDiffSidebarOpen);
 	const diffFocus = useUiStore((s) => s.diffFocus);
 	const clearDiffFocus = useUiStore((s) => s.clearDiffFocus);
@@ -157,7 +157,11 @@ export function DiffSidebar() {
 	}, [diffFocus, visibleTurns, clearDiffFocus]);
 
 	return (
-		<aside className={`diff-sidebar${open ? " open" : ""}`} aria-hidden={!open} inert={!open}>
+		<aside
+			className={`diff-sidebar ${embedded ? "diff-sidebar-embedded" : ""}${open ? " open" : ""}`}
+			aria-hidden={!open}
+			inert={!open}
+		>
 			<div className="diff-sidebar-in">
 				<div className="diff-side-head">
 					<span className="diff-side-title">{t("diff.title")}</span>

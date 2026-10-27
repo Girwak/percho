@@ -57,6 +57,8 @@ export interface UiState {
 	backgroundImage: boolean;
 	/** 暗色主题弹窗发光（shadow-dialog 白色发光投影）；旧文件缺省 true */
 	dialogGlow: boolean;
+	/** 变更侧栏嵌入主视图：右侧变更视图不再是浮层，而是主视图内的整幅页面（顶栏 diff 按钮开合）；旧文件缺省 false */
+	diffSidebarEmbedded: boolean;
 	/** 置顶会话 id（新置顶在前；只存 app 本地 ui-state.json，不写会话文件、不跨设备同步；已删除的会话 id 由写侧清理） */
 	pinnedSessions: string[];
 	/**

@@ -412,6 +412,9 @@ export const en: Messages = {
 		fxUiTransitions: "Interface transitions",
 		fxBackgroundImage: "Custom background image",
 		fxDialogGlow: "Dialog glow (dark theme)",
+		diffSidebarEmbedded: "Embed change sidebar in main view",
+		diffSidebarEmbeddedHint:
+			"The change view opens as a full page inside the main view instead of a floating right panel. The top-bar diff button acts as its tab; chat state is kept alive, so switching back loses nothing. Works even when top-bar session pills are hidden.",
 		lan: {
 			title: "Cross-device",
 			hint: "View live agent progress from your phone on a trusted local network. Off by default; the access token rotates every time it is enabled.",
