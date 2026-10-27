@@ -398,6 +398,9 @@ export const zh = {
 		centerOrb: "居中放大状态动画",
 		centerOrbHint:
 			"任务运行时在对话区域中央显示放大的状态动画（盖在文字之上，半透明遮罩压暗身后文字——工作时专心看动画即可）。只控制中央动画，Working/Thinking 状态行前的小动画始终显示。",
+		performanceMode: "性能模式",
+		performanceModeHint:
+			"关闭全部非必要视觉动效（流式跑马灯、页面切换过渡、状态动画、自定义背景图、CSS 过渡），低配置设备上保证基础操作流畅。默认关闭。",
 		lan: {
 			title: "跨设备互联",
 			hint: "在可信局域网内，用手机实时查看 agent 的运行进度。默认关闭；每次开启会轮换访问令牌。",

@@ -21,12 +21,13 @@
 export type SessionSlideDirection = "push" | "pop";
 
 /** 页面容器的标记属性（App 里挂在聊天列上；过渡只在过渡期间给它加 view-transition-name） */
+import { motionReduced } from "./motion";
+
 export const SESSION_PAGE_ATTR = "data-session-page";
 /** 页面容器上的会话标记：用来判定「新内容真的提交上屏了」 */
 export const SESSION_ID_ATTR = "data-session-id";
 /** 方向标记挂在 <html> 上，CSS 按它选关键帧 */
 export const SLIDE_ATTR = "data-session-slide";
-
 /** 等新内容提交的上限：超时就跳过过渡（用户看到「切了但没动画」，而不是「动画演了旧内容」） */
 const COMMIT_TIMEOUT_MS = 1200;
 /** 同一时刻只认最后一次过渡：旧的 finished 回来时不能把新过渡的方向标记擦掉 */
@@ -49,7 +50,7 @@ export async function withSessionSlide<T>(
 	const pane = doc.querySelector<HTMLElement>(`[${SESSION_PAGE_ATTR}]`);
 	const canSlide = shouldSlide({
 		hasApi: typeof doc.startViewTransition === "function",
-		reduceMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+		reduceMotion: motionReduced(),
 		hasPane: pane !== null,
 	});
 	if (!canSlide || !pane) return await action();

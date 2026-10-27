@@ -750,6 +750,21 @@ body {
 	background: rgb(var(--color-scrim));
 }
 
+/* 性能模式（html.perf）：全部过渡/动画收到近零时长——保留事件触发（依赖
+   transitionend/animationend 的组件不会悬挂），只是不再有可见动效；自定义背景图
+   属于持续合成开销，直接隐藏（用户开性能模式即接受放弃装饰层） */
+html.perf .app-bg,
+html.perf .app-bg-scrim {
+	display: none;
+}
+html.perf *,
+html.perf *::before,
+html.perf *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+}
+
 pre,
 code {
 	font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;

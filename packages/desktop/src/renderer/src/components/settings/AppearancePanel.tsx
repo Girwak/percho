@@ -82,6 +82,8 @@ function AppearanceBasics() {
 	const sessionRailEnabled = useUiPreferencesStore((s) => s.sessionRailEnabled);
 	const setSessionRailEnabled = useUiPreferencesStore((s) => s.setSessionRailEnabled);
 	const centerOrbEnabled = useUiPreferencesStore((s) => s.centerOrbEnabled);
+	const performanceMode = useUiPreferencesStore((s) => s.performanceMode);
+	const setPerformanceMode = useUiPreferencesStore((s) => s.setPerformanceMode);
 	const setCenterOrbEnabled = useUiPreferencesStore((s) => s.setCenterOrbEnabled);
 	const uiFontSize = useUiPreferencesStore((s) => s.uiFontSize);
 	const setUiFontSize = useUiPreferencesStore((s) => s.setUiFontSize);
@@ -219,6 +221,15 @@ function AppearanceBasics() {
 					<Switch checked={centerOrbEnabled} onCheckedChange={setCenterOrbEnabled} />
 				</div>
 				<p className="mt-0.5 text-ui-11 leading-relaxed text-ink-faint">{t("settings.centerOrbHint")}</p>
+			</div>
+			<div>
+				<div className="flex items-center justify-between gap-4">
+					<h3 className="text-ui-13 font-medium text-ink">{t("settings.performanceMode")}</h3>
+					<Switch checked={performanceMode} onCheckedChange={setPerformanceMode} />
+				</div>
+				<p className="mt-0.5 text-ui-11 leading-relaxed text-ink-faint">
+					{t("settings.performanceModeHint")}
+				</p>
 			</div>
 		</div>
 	);

@@ -403,6 +403,9 @@ export const en: Messages = {
 		centerOrb: "Centered status animation",
 		centerOrbHint:
 			"While a task is running, shows an enlarged status animation at the center of the conversation area (above the text, with a translucent scrim dimming whatever is behind it). Only controls the centered animation — the small orb before the Working/Thinking row always stays.",
+		performanceMode: "Performance mode",
+		performanceModeHint:
+			"Turns off all non-essential visual effects (streaming marquee, page slide transitions, orb animations, custom background, CSS transitions) to keep the app responsive on low-end hardware. Default off.",
 		lan: {
 			title: "Cross-device",
 			hint: "View live agent progress from your phone on a trusted local network. Off by default; the access token rotates every time it is enabled.",

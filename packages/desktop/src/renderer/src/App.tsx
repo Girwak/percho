@@ -92,6 +92,12 @@ export default function App() {
 		void initDailyDir();
 	}, []);
 
+	// 性能模式：根类挂在 <html>，globals.css 的 html.perf 规则统一关 CSS 动效 + 隐藏背景图层
+	const performanceMode = useUiPreferencesStore((s) => s.performanceMode);
+	useEffect(() => {
+		document.documentElement.classList.toggle("perf", performanceMode);
+	}, [performanceMode]);
+
 	const respondTrust = (requestId: string, optionIndex: number) => {
 		void getPi().respondTrust({ requestId, answer: optionIndex });
 		setTrustRequests((prev) => prev.filter((req) => req.id !== requestId));

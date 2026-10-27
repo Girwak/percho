@@ -45,6 +45,8 @@ export interface UiState {
 	background: BackgroundSettings;
 	/** 中央状态动画开关（任务运行时对话区中央显示放大 orb，盖文字层之上 + 半透明遮罩压暗身后文字；与状态行小 orb 解耦；旧版本文件缺省为 false） */
 	centerOrbEnabled: boolean;
+	/** 性能模式：关闭全部非必要视觉动效（流式跑马灯/页面切换过渡/思考 orb 动画/背景图/CSS 过渡）；旧文件缺省 false */
+	performanceMode: boolean;
 	/** 置顶会话 id（新置顶在前；只存 app 本地 ui-state.json，不写会话文件、不跨设备同步；已删除的会话 id 由写侧清理） */
 	pinnedSessions: string[];
 	/**

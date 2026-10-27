@@ -3,6 +3,7 @@ import { Fragment, memo, useMemo } from "react";
 import type { OrbState } from "thinking-orbs";
 import { ThinkingOrb } from "thinking-orbs";
 import { useT } from "../../i18n";
+import { motionReduced } from "../../lib/motion";
 import { ExpandArrowIcon } from "../icons";
 import { summaryLabel } from "./meta-summary-label";
 import { type LivePreviewItem, PreviewTicker } from "./PreviewTicker";
@@ -94,9 +95,7 @@ export const MetaGroup = memo(function MetaGroup({
 	const rows = items.flatMap((item, i) => [
 		// biome-ignore lint/suspicious/noArrayIndexKey: 折叠组内项无独立 id，列表顺序稳定
 		item.thinking ? <ThinkingRow key={`thinking-${i}`} thinking={item.thinking} /> : null,
-		...item.tools.map((tool) => (
-			<ToolCallCard key={tool.key} tool={tool} />
-		)),
+		...item.tools.map((tool) => <ToolCallCard key={tool.key} tool={tool} />),
 	]);
 	// orb 状态（名字是包的渲染器名，与我们的语义不同名）：
 	// tool 运行中 → connecting（星座连线 + 信号跑边）
@@ -156,7 +155,7 @@ export const MetaGroup = memo(function MetaGroup({
 						{shownWorking ? (
 							<>
 								<div className="flex shrink-0 items-center gap-2">
-									<ThinkingOrb state={orbState} size={20} paused={false} />
+									<ThinkingOrb state={orbState} size={20} paused={motionReduced()} />
 									<span
 										ref={labelRef}
 										className="sweep-target text-ui-14 font-bold text-ink-working transition-colors group-hover/row:text-ink"

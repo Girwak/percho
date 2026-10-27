@@ -18,6 +18,8 @@ import { applyFontScales } from "../lib/typography";
 interface UiPreferencesStore {
 	/** 中央状态动画：任务运行时对话区中央显示放大 orb（z-20 文字层之上 + canvas 一体遮罩压文字）；与 Working/Thinking 行前小 orb 解耦，小 orb 恒显示 */
 	centerOrbEnabled: boolean;
+	/** 性能模式：关闭全部非必要视觉动效（见 lib/motion.ts 与 globals.css 的 html.perf 规则）；默认关 */
+	performanceMode: boolean;
 	/** 置顶会话（id，新置顶在前）：**v8 起就是顶栏胶囊的内容**（左栏只靠图钉标记，不改顺序） */
 	pinnedSessions: string[];
 	/** 按会话记住的权限模式（只存非 default；见 spec/permission-mode.md D7） */
@@ -54,6 +56,7 @@ interface UiPreferencesStore {
 	/** 启动时从 ui-state.json 恢复（main.tsx 在 render 前 await，避免开关状态闪现） */
 	init: () => Promise<void>;
 	setCenterOrbEnabled: (enabled: boolean) => void;
+	setPerformanceMode: (enabled: boolean) => void;
 	/** 置顶 / 取消置顶（新置顶排最左） */
 	togglePin: (sessionId: string) => void;
 	setBarSessionsVisible: (visible: boolean) => void;
@@ -101,6 +104,7 @@ function persistPatch(patch: Partial<UiState>): void {
 
 export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 	centerOrbEnabled: false,
+	performanceMode: false,
 	pinnedSessions: [],
 	sessionPermissionModes: {},
 	barSessionsVisible: true,
@@ -127,6 +131,7 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 			saved?.chatColumnWidthMode === "wide" ? "wide" : "default";
 		set({
 			centerOrbEnabled: saved?.centerOrbEnabled ?? false,
+			performanceMode: saved?.performanceMode ?? false,
 			pinnedSessions: saved?.pinnedSessions ?? [],
 			sessionPermissionModes: saved?.sessionPermissionModes ?? {},
 			barSessionsVisible: saved?.barSessionsVisible ?? true,
@@ -148,6 +153,11 @@ export const useUiPreferencesStore = create<UiPreferencesStore>((set, get) => ({
 	setCenterOrbEnabled: (enabled) => {
 		set({ centerOrbEnabled: enabled });
 		persistPatch({ centerOrbEnabled: enabled });
+	},
+
+	setPerformanceMode: (enabled) => {
+		set({ performanceMode: enabled });
+		persistPatch({ performanceMode: enabled });
 	},
 
 	setBarSessionsVisible: (visible) => {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motionReduced } from "../../lib/motion";
 import { useThemeStore } from "../../stores/theme";
 import { drawCenterOrb } from "./center-orb-draw";
 
@@ -85,7 +86,7 @@ export function CenterOrb({ visible }: { visible: boolean }) {
 			ctx.clearRect(0, 0, BASE, BASE);
 			drawCenterOrb(ctx, BASE, t, dark);
 		};
-		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+		if (motionReduced()) {
 			paint(0.6);
 			return;
 		}
