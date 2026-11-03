@@ -32,6 +32,19 @@ export const en: Messages = {
 		unpin: "Unpin",
 		sessionList: "Session list",
 	},
+	/** Top-bar "open" entry: main part opens the file manager, chevron lists all detected targets */
+	openWith: {
+		open: "Open project folder",
+		more: "More ways to open",
+		explorer: "Open in File Explorer",
+		finder: "Open in Finder",
+		fileManager: "Open in file manager",
+		vscode: "Open with VS Code",
+		gitBash: "Open with Git Bash",
+		terminal: "Open in Terminal",
+		openFailed: "Failed to open",
+		detectFailed: "Failed to detect open targets",
+	},
 	rail: {
 		ariaLabel:
 			"Session rail: use the arrow keys to move between entries; press Delete or Backspace to remove the current entry from the workspace (the session stays open)",

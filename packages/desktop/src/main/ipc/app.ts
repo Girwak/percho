@@ -5,6 +5,7 @@ import { app, BrowserWindow, dialog, nativeTheme, shell } from "electron";
 import { pickBackgroundImage } from "../background";
 import { ensureDailyDir } from "../daily";
 import { checkoutBranch, getGitBranch, listGitBranches } from "../git";
+import { listOpenTools, openWithTool } from "../open-with";
 import { resolveExistingPath } from "../path-target";
 import { loadUiState, saveUiState } from "../ui-state";
 import {
@@ -65,6 +66,9 @@ export function registerAppIpc(_backend: PiBackend): void {
 		revealPath: ({ target, cwd }) => {
 			shell.showItemInFolder(resolveExistingPath(target, cwd));
 		},
+		// 顶栏「打开」：检测可用目标 + 用指定工具开项目根目录（检测/启动都在 main/open-with.ts）
+		listOpenTools: () => listOpenTools(),
+		openWith: ({ cwd, tool }) => openWithTool(cwd, tool),
 		getAppInfo: () => ({
 			name: app.getName(),
 			version: app.getVersion(),
