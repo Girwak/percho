@@ -315,6 +315,9 @@ export const SETTINGS_CHANNELS = {
 	respondTrust: ch("trust:respond")<{ requestId: string; answer: TrustAnswer }, void>(),
 } as const;
 
+/** 「打开项目目录」目标：fileManager 恒可用，其余按平台与安装情况检测（main/open-with.ts） */
+export type OpenToolId = "fileManager" | "vscode" | "gitBash" | "terminal";
+
 /** 应用域：窗口级功能（对话框/背景/更新/tabs/ui-state/git/外链等，多为非透传 handler） */
 export const APP_CHANNELS = {
 	/** 弹保存对话框并写文件；用户取消返回 null，成功返回写入路径 */
@@ -333,6 +336,10 @@ export const APP_CHANNELS = {
 	openPath: ch("app:openPath")<{ target: string; cwd: string | null }, void>(),
 	/** 在系统文件管理器中显示该文件（macOS = 访达；路径解析同上） */
 	revealPath: ch("app:revealPath")<{ target: string; cwd: string | null }, void>(),
+	/** 检测「通过 xxx 打开」可用目标（结果主进程缓存，进程重启才重查） */
+	listOpenTools: ch("app:listOpenTools")<void, OpenToolId[]>(),
+	/** 用指定工具打开项目根目录（目录不存在或目标未检测到抛错 → toast） */
+	openWith: ch("app:openWith")<{ cwd: string; tool: OpenToolId }, void>(),
 	/** 应用信息（版本/运行时版本/仓库地址，设置关于页用） */
 	getAppInfo: ch("app:getInfo")<void, AppInfo>(),
 	/** 日常空间工作台目录（懒创建后返回；日常会话的固定 cwd） */

@@ -26,6 +26,7 @@
 | 导航、并发装载、历史就绪 | renderer `stores/session-navigation.ts`、`session-loading.ts`、`session-history.ts` |
 | 会话目录、项目、左栏分组 | renderer `stores/projects.ts`、`lib/sidebar-groups.ts`、`components/sidebar/` |
 | 顶栏胶囊、左侧轨道、工作区恢复 | renderer `stores/session-workspace*.ts`、`components/session/`；移出动作 `lib/workspace-actions.ts` |
+| 顶栏「打开」（文件管理器/VS Code/Git Bash/终端） | desktop `main/open-with.ts`；renderer `components/session/OpenButton.tsx`；通道 shared `ipc-channels.ts` |
 | 会话自动卸载、频道驻留 | renderer `lib/session-gc*.ts`、`lib/use-session-gc.ts`；backend `channel-subscriptions.ts` |
 | 消息事件、历史回放、轮次派生 | shared `transcript/`；backend `session/messages.ts`；renderer `stores/transcript.ts` |
 | 消息气泡、Markdown、Mermaid、工具卡 | renderer `components/chat/`；流式合流 `stores/event-conflator.ts` |

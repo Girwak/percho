@@ -37,6 +37,7 @@ import { useUiPreferencesStore } from "../../stores/ui-preferences";
 import { CloseIcon, DiffIcon, PanelLeftIcon, PinIcon, PlusIcon } from "../icons";
 import { ContextMenu, type ContextMenuItem } from "../ui/ContextMenu";
 import type { MenuAnchor } from "../ui/place-menu";
+import { OpenButton } from "./OpenButton";
 import { RenamePopover } from "./RenamePopover";
 import { SessionAvatar } from "./SessionAvatar";
 import {
@@ -461,6 +462,8 @@ export function SessionTabBar() {
 			>
 				<DiffIcon size={16} />
 			</button>
+			{/* 打开项目目录：变更按钮之后，主体直开文件管理器 + 小箭头出完整菜单（OpenButton） */}
+			<OpenButton />
 			{menu !== null && (
 				<ContextMenu anchor={menu.anchor} items={contextMenuItems(menu.sessionId)} onClose={closeMenu} />
 			)}

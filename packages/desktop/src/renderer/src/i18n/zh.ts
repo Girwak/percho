@@ -31,6 +31,19 @@ export const zh = {
 		sessionList: "会话列表",
 		/** 顶栏 × （v12 起 = 从临时工作区移出，不是关会话、也不是取消置顶） */
 	},
+	/** 顶栏「打开」入口：主体一键进文件管理器，小箭头列全部检测到的打开方式 */
+	openWith: {
+		open: "打开项目目录",
+		more: "更多打开方式",
+		explorer: "在资源管理器中打开",
+		finder: "在访达中打开",
+		fileManager: "在文件管理器中打开",
+		vscode: "通过 VS Code 打开",
+		gitBash: "通过 Git Bash 打开",
+		terminal: "在终端中打开",
+		openFailed: "打开失败",
+		detectFailed: "检测可用打开方式失败",
+	},
 	/** 左侧会话轨道（设置 → 外观；默认关） */
 	rail: {
 		/** nav 的无障碍名：一条就说明白怎么用（只能靠键盘逐条移出时尤其重要） */
